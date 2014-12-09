@@ -25,7 +25,6 @@ from matplotlib import rc
 from matplotlib import ticker
 
 import math
-from mycollections import Counter
 import pylab as P
 import os
 import subprocess
@@ -413,7 +412,9 @@ def invariant_coordinates_trasf(x, xp, y, yp, bx,by, ax, ay):
 	
 	
 def read_distro(filename):
-	
+	'''reads the data of the charge density distribution from a text file
+	NOT SURE IF WORKING'''
+
 	x0, y0 = np.loadtxt(filename, delimiter = '\n', dtype = str)
 	x0       =   []
 	y0      =   []

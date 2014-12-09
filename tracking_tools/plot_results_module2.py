@@ -12,8 +12,6 @@
 # --------------------------------------------------------------------------------------------------------------
 
 import numpy as np
-import scipy as sp
-import scipy.stats as stats
 import sqlite3
 import copy
 
@@ -25,7 +23,6 @@ from matplotlib import rc
 from matplotlib import ticker
 
 import math
-from mycollections import Counter
 import pylab as P
 import os
 import subprocess

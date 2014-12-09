@@ -83,7 +83,7 @@ def launch_jobs(relpath, SixTrack_folder):
 
 	os.system('chmod +x tracker.sh')
 
-	#proc_stat = subprocess.Popen('bsub -q 8nh tracker.sh %s' %DIR, shell=True)
+	proc_stat = subprocess.Popen('bsub -q 8nh tracker.sh %s' %DIR, shell=True)
 
 	#os.chdir(home)
 	
