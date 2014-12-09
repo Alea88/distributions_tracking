@@ -1,0 +1,559 @@
+
+# --------------------------------------------------------------------------------------------------------------
+# RESULT PLOTS
+# forked from ANDREA SANTAMARIA source
+# by GIOVANNA CAMPOGIANI
+# LAST MODIFIED: 15/09/2014
+# This script plots the tracking data results, superimposed with the distribution
+# --------------------------------------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------------------------------------
+# Import libraries and introduce abbreviations
+# --------------------------------------------------------------------------------------------------------------
+
+import numpy as np
+import scipy as sp
+import scipy.stats as stats
+import sqlite3
+import copy
+
+import matplotlib
+matplotlib.use("Agg")
+
+from matplotlib import pyplot as plt
+from matplotlib import rc
+from matplotlib import ticker
+
+import math
+from mycollections import Counter
+import pylab as P
+import os
+import subprocess
+
+from db_to_data import read_6D_coordinates_for_specific_turn, read_from_db,read_from_db_all
+from uniform_distribution import calc_beam_params, uniform_distribution_generator, gaussian 
+
+
+# --------------------------------------------------------------------------------------------------------------
+# Text characteristics of the plots
+# --------------------------------------------------------------------------------------------------------------
+params 		= {	'backend': 'pdf',
+			'font.size':18,	
+          	'axes.labelsize': 18,
+          	'legend.fontsize': 18,
+          	'xtick.labelsize': 18,
+          	'ytick.labelsize': 18,
+	  		'text.usetex':True,
+	  		'figure.subplot.wspace' : 0.5,
+        	'figure.subplot.hspace' : 0.5,
+        	 } 
+        	 
+# --------------------------------------------------------------------------------------------------------------
+# Activate LaTeX 
+# --------------------------------------------------------------------------------------------------------------      
+rc('text.latex', preamble=r'\usepackage{cmbright}')
+matplotlib.rcParams.update(params)
+
+
+
+
+
+def add_gaussian_to_table(dbname, value1):
+	'''function to save the values of charge associated to each particle as a column in the db
+	NOT SURE IT REALLY WORKS'''
+	tab = sqlite3.connect(dbname)
+	
+	cur = tab.cursor()
+	
+		
+	cur.execute('SELECT * FROM tracking_data;')
+	
+	print 'single entry line before modification'
+	
+	print cur.fetchone()
+	
+	cur.execute('ALTER TABLE tracking_data ADD COLUMN cd')
+	
+	tmp = []
+	for i in range(len(value1)):
+		tmp.append((value1[i],i+1))
+		
+	#print tmp
+	
+	cur.executemany('UPDATE tracking_data SET cd=? WHERE partID=?',tmp)
+	
+	tab.commit()
+	
+	cur.execute('SELECT * FROM tracking_data;')
+	
+	print 'single entry line after modification'
+	
+	print cur.fetchone()
+	
+	
+	cur.close()
+	tab.close()
+	
+	
+	
+	
+
+
+def beam_scatter(variable_1, variable_2, string_1, string_2, title, d):
+	'''scatter plot of variable_1 vs variable_2'''
+	fig 		= plt.figure()
+	ax 			= fig.add_subplot(1, 1, 1)
+	
+	ax.scatter(variable_1, variable_2, c = d)
+	ax.set_xlabel(r'%s'%string_1)
+	ax.set_ylabel(r'%s'%string_2)
+	ax.set_xlim([min(variable_1) + (min(variable_1)), max(variable_1) + (max(variable_1))])
+	ax.set_ylim([min(variable_2) + (min(variable_2)), max(variable_2) + (max(variable_2))])
+	ax.ticklabel_format(style='sci', axis='both', scilimits=(0,0))
+	ax.grid(b=True, which='major',linestyle='--')
+	
+	plt.title(title)
+	plt.show()
+	
+	return fig
+
+
+
+
+
+def beam_scatter_comparison(variable_1, variable_2, variable_3, variable_4, string_1, string_2, title, t, m):
+	'''comparison among 2 scatter plots, each of 2 variables, color-coded with d'''
+	fig 	= matplotlib.figure.Figure(tight_layout=True)
+	
+	ax1 	= fig.add_subplot(1,2,1)
+	ax2 	= fig.add_subplot(1,2,2)
+	
+	print variable_1[0],'',variable_2[0],'',variable_3[0],'',variable_4[0]
+
+	#FIRST PLOT (INITIAL CONDITIONS)
+	# --------------------------------------------------------------------------------------------------------------
+
+	ax1.scatter(variable_1, variable_2, c = t, vmin= min(m),vmax = max(m),edgecolors='none')
+	ax1.set_xlabel(r'%s'%string_1)
+	ax1.set_ylabel(r'%s'%string_2)
+	ax1.set_xlim([min(variable_1) + (min(variable_1)), max(variable_1) + (max(variable_1))])
+	ax1.set_ylim([min(variable_2) + (min(variable_2)), max(variable_2) + (max(variable_2))])
+	ax1.ticklabel_format(style='sci', axis='both', scilimits=(0,0))
+	ax1.grid(b=True, which='major',linestyle='--')
+		
+	
+	#SECOND PLOT (FINAL CONDITIONS)
+	# --------------------------------------------------------------------------------------------------------------
+
+	ax2.scatter(variable_3, variable_4, c = m, vmin= min(m),vmax = max(m), edgecolors='None')
+	ax2.set_xlabel(r'%s'%string_1)
+	ax2.set_ylabel(r'%s'%string_2)
+	ax2.set_xlim([min(variable_3) + (min(variable_3)), max(variable_3) + (max(variable_3))])
+	ax2.set_ylim([min(variable_4) + (min(variable_4)), max(variable_4) + (max(variable_4))])
+	ax2.ticklabel_format(style='sci', axis='both', scilimits=(0,0))
+	ax2.grid(b=True, which='major',linestyle='--')
+		
+	print len(m),' len ',len(variable_3)
+	
+	#COMMON TITLE
+	# --------------------------------------------------------------------------------------------------------------
+	plt.suptitle('%s' %title, fontsize=30)
+	plt.show
+	
+	return fig
+
+
+
+
+
+
+def beam_scatter_final_comparison(variables_list, label_list, titles_list, t, colorant):
+	'''produces 4 sub-scatterplots so variables_list must contain 8 variables, while the colorant is a single vector, the same for all the plots'''
+	# ---------- Abbreviations def ----------
+	fig	= plt.figure()
+	ax1	= plt.subplot(221)
+	ax2 = plt.subplot(223)
+	ax3 = plt.subplot(224)
+	ax4 = plt.subplot(222)
+
+	# ---------- FIRST PLOT --------
+	
+	ax1.scatter(variables_list[0][0], variables_list[0][1], c = colorant, edgecolors='None')
+	ax1.set_xlabel(r'%s'%label_list[0][0])
+	ax1.set_ylabel(r'%s'%label_list[0][1])
+	ax1.set_xlim([min(variables_list[0][0]) + (min(variables_list[0][0])), max(variables_list[0][0]) + (max(variables_list[0][0]))])
+	ax1.set_ylim([min(variables_list[0][1]) + (min(variables_list[0][1])), max(variables_list[0][1]) + (max(variables_list[0][1]))])
+	ax1.ticklabel_format(style='sci', axis='both', scilimits=(10,10))
+	ax1.grid(b=True, which='major',linestyle='--')
+	
+	#---------- SECOND PLOT --------
+	
+	ax2.scatter(variables_list[1][0], variables_list[1][1], c = colorant, edgecolors='None')
+	ax2.set_xlabel(r'%s'%label_list[1][0])
+	ax2.set_ylabel(r'%s'%label_list[1][1])
+	ax2.set_xlim([min(variables_list[1][0]) + (min(variables_list[1][0])), max(variables_list[1][0]) + (max(variables_list[1][0]))])
+	ax2.set_ylim([min(variables_list[1][1]) + (min(variables_list[1][1])), max(variables_list[1][1]) + (max(variables_list[1][1]))])
+	ax2.ticklabel_format(style='sci', axis='both', scilimits=(10,10))
+	ax2.grid(b=True, which='major',linestyle='--')
+	
+	#---------- THIRD PLOT --------
+	
+	ax3.scatter(variables_list[2][0], variables_list[2][1], c = colorant, edgecolors='None')
+	ax3.set_xlabel(r'%s'%label_list[2][0])
+	ax3.set_ylabel(r'%s'%label_list[2][1])
+	ax3.set_xlim([min(variables_list[2][0]) + (min(variables_list[2][0])), max(variables_list[2][0]) + (max(variables_list[2][0]))])
+	ax3.set_ylim([min(variables_list[2][1]) + (min(variables_list[2][1])), max(variables_list[2][1]) + (max(variables_list[2][1]))])
+	ax3.ticklabel_format(style='sci', axis='both', scilimits=(10,10))
+	ax3.grid(b=True, which='major',linestyle='--')
+	
+	#---------- FOURTH PLOT --------
+	
+	ax4.scatter(variables_list[3][0], variables_list[3][1], c = colorant, edgecolors='None')
+	ax4.set_xlabel(r'%s [m rad]'%label_list[3][0])
+	ax4.set_ylabel(r'%s [m rad]'%label_list[3][1])
+	#ax4.set_xlim([min(variables_list[3][0]) + (min(variables_list[3][0])), max(variables_list[3][0]) + (max(variables_list[3][0]))])
+	#ax4.set_ylim([min(variables_list[3][1]) + (min(variables_list[3][1])), max(variables_list[3][1]) + (max(variables_list[3][1]))])
+	ax4.ticklabel_format(style='sci', axis='both', scilimits=(0,0))
+	ax4.grid(b=True, which='major',linestyle='--')
+	
+	plt.suptitle(titles_list[0]+'; '+titles_list[1]+' '+titles_list[2]+'; '+titles_list[3]+'\n @turn %d' %t)
+		
+	plt.show()
+	
+	return fig
+
+
+
+
+def simple_absorption_plot(lost_parts, n_samples, turns):
+	'''it takes as input a vector containing the number of lost particles per each turn
+	and plots the number of lost particles per turn'''
+
+	
+	fig 		= P.figure()
+	ax 		= fig.add_subplot(1, 1, 1)
+	
+	ax.bar(turns, lost_parts, log=True, width=0.08, align='center')
+	ax.set_xlabel('Turn number',fontsize=18)
+	ax.set_ylabel('Lost particles',fontsize=18)
+	ax.grid(b=True, which='major',linestyle='--')
+	
+	plt.suptitle('Turn by turn lost particles', fontsize=25)
+	plt.show()
+
+	return fig
+
+
+def get_colorbar(lost_parts_IDs, dbname, tablename):
+	'''reads the max survived turn of each of the lost particles'''
+	lp_lifetime = []
+
+	for nth_part in lost_parts_IDs:
+		survived_turns = read_from_db_all('turnID', dbname,tablename,'partID',nth_part)
+		lp_lifetime.append(max(survived_turns))
+	
+	return lp_lifetime
+
+
+
+def lossvsiaction(initial_population, final_population, Jx0, Jy0, dbname, tablename):
+	'''input: vectors containing the particle IDs at initial conditions and final turn, the initial action values and the db data
+	returns how many, of all the particles lost, had a certain initial action'''
+
+	lost_population = list(set(initial_population)-set(final_population))
+
+	print  'IDs of lost particles are: ',lost_population
+	print 'The total number of absorbed particles is: ', len(lost_population), '/', len(initial_population)
+
+	cb = get_colorbar(lost_population, dbname, tablename)	
+
+	lost_population = np.array(lost_population) - 1
+
+	initial_action_of_lost_particles = Jx0[lost_population] + Jy0[lost_population]
+	print 'Initial action of lost particles is : ', initial_action_of_lost_particles	
+
+	fig 	= P.figure()
+	ax 	= fig.add_subplot(1, 1, 1)
+	
+	ax.hist(initial_action_of_lost_particles,facecolor=cb)
+	#P.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
+	
+	ax.set_xlabel('(Jx0 + Jy0) [mm-rad]',fontsize=18)
+	ax.set_ylabel('Number of lost particles',fontsize=18)
+	ax.grid(b=True, which='major',linestyle='--')
+	ax.ticklabel_format(style='sci', axis='both', scilimits=(0,0))
+	
+	plt.suptitle('Particle loss vs initial amplitude', fontsize=25)
+	plt.show()
+	
+	return fig
+
+
+
+
+
+
+def turn_by_turn_lost_current(tbt_current_loss, turns):
+	'''input: vector containing the turn bu turn total lost charge and plots its evolution'''
+
+	tbt_current_loss = np.array(tbt_current_loss)
+
+	tbt_current_loss = tbt_current_loss
+
+
+	fig 	= P.figure()
+	ax 	= fig.add_subplot(1, 1, 1)
+	
+	ax.bar(turns, tbt_current_loss, width=0.08, align='center')
+	ax.set_xlabel(r'Turn number',fontsize=18)
+	ax.set_ylabel(r'Lost current [\%]',fontsize=18)
+	ax.grid(b=True, which='major',linestyle='--')
+	
+	plt.suptitle('Turn by turn lost current', fontsize=25)
+	plt.show()
+	
+	return fig
+
+
+
+
+def relative_action(Jx0, Jy0, Jx, Jy, x0, y0, partID, sigmax,sigmay):
+	'''input: initial and final action, beam sizes, particle IDs; 
+	output: plot of relative action variation vs initial amplitude'''
+
+	fig 		= P.figure()
+	ax 		= fig.add_subplot(1, 1, 1)
+	
+#	partID = np.sort(partID, kind='mergesort') - 1
+	print 'the survived particles are: ', partID
+	partID = partID - 1 
+
+	xvar = np.sqrt((x0[partID]/sigmax)**2 + (y0[partID]/sigmay)**2)
+#	xvar = partID
+	print 'partID type: ', type(partID)
+	yvar = (Jx + Jy ) / (Jx0[partID] + Jy0[partID] )
+	
+	print 'mean action value:', np.mean(yvar)
+	
+	ax.bar(xvar, yvar, log=True, width=0.08, align='center')
+	ax.set_xlabel('Initial amplitude [$\sigma$]',fontsize=18)
+	ax.set_ylabel('Relative action variation $(J_x+J_y)/(J_x_0+J_y_0)$',fontsize=18)
+	ax.grid(b=True, which='major',linestyle='--')
+	
+	plt.suptitle('Relative action variation', fontsize=25)
+	plt.show()
+	
+	return fig
+
+
+
+
+def relative_energy(en0,en,x0,y0,partID,sigmax,sigmay):
+	'''relative energy variation, useless if 4D'''
+
+	fig 		= P.figure()
+	ax 		= fig.add_subplot(1, 1, 1)
+	
+	partID = np.sort(partID) - 1
+
+	xvar = np.sqrt((x0[partID]/sigmax)**2 + (y0[partID]/sigmay)**2)
+	#xvar = x0[partID]
+	yvar = en / en0[partID]
+	
+	
+	ax.bar(xvar, yvar, log=True, width=0.08, align='center')
+	ax.set_xlabel('Initial amplitude [$\sigma$]',fontsize=18)
+	ax.set_ylabel('Relative action variation $(J_x+J_y)/(J_x_0+J_y_0)$',fontsize=18)
+	ax.grid(b=True, which='major',linestyle='--')
+	
+	plt.suptitle('Relative energy', fontsize=25)
+	plt.show()
+	
+	return fig
+
+
+
+
+
+def action(u, key1, key2, b):
+	'''assumes a dictionary u{x,xp,y,yp}
+	Action = pi * radius of normalised phase space squared
+	'''
+		
+	J = (u[key1]**2 + u[key2]**2)/(b*2.0)
+
+	return J
+
+
+
+def invariant_coordinates_trasf(x, xp, y, yp, bx,by, ax, ay):
+	''' returns the normalised phase space coordinates
+	calculated as u = z; u' = z' * beta_star
+	'''
+	## converto to m
+	x=x/1000.0
+	y=y/1000.0
+	xp=xp/1000.0
+	yp=yp/1000.0
+	
+	## normalised phase space coordinates
+	u = {}
+	
+	
+	u['X'] = x
+	u['Px'] = bx * xp + ax * x
+	
+	u['Y'] = y
+	u['Py'] = by * yp + ay * y
+	
+	return u
+	
+	
+	
+	
+	
+def read_distro(filename):
+	'''reads the data of the charge density distribution from a text file
+	NOT SURE IF WORKING'''
+
+	x0, y0 = np.loadtxt(filename, delimiter = '\n', dtype = str)
+	x0       =   []
+	y0      =   []
+	
+	for values in data:
+		x0.append    (float(values[0]))
+		y0.append   (float(values[1]))
+		
+	return x0, y0
+	
+	
+	
+	
+	
+#------------------------------------------------------------------------
+# MAIN
+#------------------------------------------------------------------------	
+
+def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp, n_samples,wr_fr, closorb,beta_star,beta_stary,alpha_x,alpha_y):
+	'''runs the post-processing analysis'''
+	
+	sigmax,sigmay, sigmapx,sigmapy, gamma_rel, beta_rel = calc_beam_params(emitn, energy0, beta_star,beta_stary, alpha_x, alpha_y)
+	
+	iturn = 0		#raw_input('Insert the starting point turn number:\t')
+	eturn = 100000 	#raw_input('Insert the end point turn number:\t')
+	
+	ic = read_6D_coordinates_for_specific_turn(dbname, tablename, 0)
+	npart = len(ic['x'])
+
+	print 'Particles tracked = ', npart
+
+	lost = []
+	tbt_current_loss = []
+	turns = np.arange(int(iturn),int(eturn)+int(wr_fr),int(wr_fr))
+
+	for i in turns:
+
+		if i == 0:
+
+			ic['x'] = ic['x'] - closorb[0] #np.mean(ic['x'])
+			ic['xp'] = ic['xp']- closorb[1] #np.mean(ic['xp'])
+			ic['y'] = ic['y'] - closorb[2] #np.mean(ic['y'])
+			ic['yp'] = ic['yp']- closorb[3] #np.mean(ic['yp'])
+				
+			gd = gaussian(ic['x'],ic['y'],sigmax)
+
+			u0 = invariant_coordinates_trasf(ic['x'],ic['xp'],ic['y'],ic['yp'],beta_star,beta_stary,alpha_x,alpha_y)
+			Jx0 = action(u0, 'X', 'Px', beta_star)
+			Jy0 = action(u0, 'Y', 'Py', beta_stary)
+
+			c = copy.deepcopy(ic)
+
+		else:
+
+			c6d = read_6D_coordinates_for_specific_turn(dbname, tablename, i)
+			c = copy.deepcopy(c6d)
+			
+			c['x'] = c['x'] - closorb[0] #np.mean(ic['x'])
+			c['xp'] = c['xp'] - closorb[1] #np.mean(ic['xp'])
+			c['y'] = c['y'] - closorb[2] #np.mean(ic['y'])
+			c['yp'] = c['yp'] - closorb[3] #np.mean(ic['yp'])
+		
+		temp = npart - 1
+ 
+		pindex = ic['partID'] - 1
+
+		if (len(c['x']) < temp):
+
+			plost = temp-len(c['x'])
+			lost.append(plost)
+
+			nindex = c['partID'] - 1
+			ilost = list(set(pindex) - set(nindex))
+			tbt_current_loss.append(sum(gd[ilost]))
+			pindex = nindex
+			temp = len(c['x']) - 1
+
+		else:
+			lost.append(0)
+			tbt_current_loss.append(0)
+		print '@turn ', i,': ', len(c['x']),' particles survived'
+
+		
+		print 'the survived particles are: ', c['partID']
+		
+
+		u = invariant_coordinates_trasf(c['x'],c['xp'],c['y'],c['yp'],beta_star,beta_stary,alpha_x,alpha_y)
+		Jx = action(u, 'X', 'Px', beta_star)
+		Jy = action(u, 'Y', 'Py', beta_stary)
+		
+		# normalise phase space units to be in sigma, sigma_p
+		c['x'] = c['x']/sigmax
+		c['y'] = c['y']/sigmay
+		c['xp'] = c['xp']/sigmapx
+		c['yp'] = c['yp']/sigmapy
+		
+		
+		if i in [0,1000,10000,100000]:
+
+			variables_list = [[c['x'],c['y']],[c['x'],c['xp']],[c['y'],c['yp']], [Jx, Jy]]
+			#variables_list = [[u['X'],u['Y']],[u['X'],u['Px']],[u['Y'],u['Py']], [Jx, Jy]]
+		
+			label_list = [[r'$x [\sigma]$',r'$y [\sigma]$'],
+			[r'$x [\sigma]$',r'$x^\prime [\sigma_{p}]$'],
+			[r'$y [\sigma]$',r'$y^\prime [\sigma_{p}]$'],
+			[r'$J_{x}$',r'$J_{y}$'],
+			]
+		
+			titles_list = ['Configuration space','Horizontal and','Vertical phase space','Action space'] 
+		
+			fig = beam_scatter_final_comparison(variables_list, label_list, titles_list, i, gd[c['partID']-1])
+		
+			fname ='t%s_%d.png' %(dbname,i)
+			
+			print 'Saving frame', fname
+			fig.savefig(fname)
+
+	print 'Particles survived after 10e5 turns = ', len(c['x'])
+	survived = np.array(survived)
+
+
+
+
+	#energyvar = relative_energy(en0,en,ic['x'],ic['y'],c['partID'],sigmax,sigmay)
+	#energyvar.savefig('relative_energy_variation')
+
+	actionvar = relative_action(Jx0, Jy0, Jx, Jy, ic['x'], ic['y'], c['partID'], sigmax,sigmay)
+	actionvar.savefig('relative_action_variation')
+
+
+	if list(set(ic['partID'])-set(c['partID'])) != []:
+
+		lvia = lossvsiaction(ic['partID'],c['partID'],Jx0,Jy0, dbname, tablename)
+		lvia.savefig('loss_vs_ic')
+	
+		absorbed = simple_absorption_plot(lost,n_samples, turns)
+		absorbed.savefig("absorbedparts%s.png" %dbname[:-9])
+
+		currentloss = turn_by_turn_lost_current(tbt_current_loss, turns)
+		currentloss.savefig('turn_by_turn_lost_current')
+

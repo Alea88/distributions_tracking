@@ -1,0 +1,291 @@
+# --------------------------------------------------------------------------------------------------------------
+# UNIFORM DISTRIBUTION GENERATOR
+# GIOVANNA CAMPOGIANI
+# LAST MODFIIED: 19/09/2014
+# This script creates multiple fort.13 files with 30 particles to be then fed to SixTrack with the idfor=2 option on
+# The i.c. generated are of a uniform distribution on a disk
+# The user is requested to inser the desired parameters for the distribution generation in the
+# USER INPUT BLOCK of the program
+# --------------------------------------------------------------------------------------------------------------
+
+import numpy as np
+
+import os
+import math
+
+
+#-----------------------------------------------------------------------------------------------------------------
+# UTILITIES
+#-----------------------------------------------------------------------------------------------------------------
+
+
+def calc_beam_params(epsilon_n, E0, beta_star,beta_stary, alpha_x, alpha_y):
+	'''RETURNS SIGMA IN mm!!
+	takes normalised emittance[m*rad], energy [MeV], betastar [m], returns transv sigma
+	'''
+	# Conversions: energy from MeV to eV
+	# --------------------------------------------------------------------------------------------------------------
+
+	E0 = E0 * 1000000.0
+
+	# Proton mass [eV/c^2], energy [MeV], number of particles, relativistic gamma, relativistic beta
+	# --------------------------------------------------------------------------------------------------------------
+
+	PMASS = 0.938272046e9 #eV
+		
+	gamma_rel = E0 / PMASS
+	beta_rel = math.sqrt(gamma_rel**2 -1)/gamma_rel
+	
+	print 'Relativistic Gamma 			= %E'% gamma_rel
+	print 'Relativistic Beta 			= %E'% beta_rel
+	
+	# Transverse geometric emittances [m-rad]
+	# --------------------------------------------------------------------------------------------------------------
+
+	epsilon_x = epsilon_n / (beta_rel * gamma_rel)
+	epsilon_y = epsilon_x
+	
+	print 'epsilon_x 			= %E [m*rad]'% epsilon_x
+	print 'epsilon_y 			= %E [m*rad]'% epsilon_y
+
+	
+	# Twiss Parameters [m] (round beams)
+	# --------------------------------------------------------------------------------------------------------------
+	beta_x		= beta_star					# Ratio of beam dimension and beam divergence in a symmetry point, 
+	beta_y		= beta_stary					# associated to the transverse size of the beam. Beta star.
+
+	print 'beta_x 						= %E [m] '% beta_x
+	print 'beta_y 						= %E [m] '% beta_y
+
+	alpha_x		= alpha_x 					# Describes how strong x and x' are correlated. 
+	alpha_y		= alpha_y 					# alpha=0 --> beam has minimum or maximum
+
+	print 'alpha_x 				= %E [m] '% alpha_x
+	print 'alpha_y 				= %E [m] '% alpha_y
+
+	gamma_x		= (1 + (alpha_x)**2)/beta_x
+	gamma_y		= (1 + (alpha_y)**2)/beta_y
+
+	print 'gamma_x 					= %E [m] '% gamma_x
+	print 'gamma_y 					= %E [m] '% gamma_y
+	
+	# RMS Bunch length [m], RMS energy spread [%] (RMS = root mean square)
+	# --------------------------------------------------------------------------------------------------------------
+	sigma_z		= 0.07
+	sigma_E		= 0.0
+	em_z		= sigma_z*sigma_E
+
+	print 'em_z 				= %E [m . rad]'% em_z
+
+	# Standard Deviations
+	# --------------------------------------------------------------------------------------------------------------
+	
+	sigma_x		= math.sqrt(beta_x * epsilon_x)
+	sigma_y		= math.sqrt(beta_y * epsilon_y) 		
+
+	print 'sigma_x 				= %E [m] '% sigma_x
+	print 'sigma_y 				= %E [m] '% sigma_y
+	
+	sigmax = sigma_x * 1000.0
+	sigmay = sigma_y * 1000.0
+	
+	print 'sigma_x 				= %E [mm] '% sigmax	
+	print 'sigma_y 				= %E [mm] '% sigmay	
+
+	sigma_px	= math.sqrt(gamma_x*epsilon_x) 		# beam divergence
+	sigma_py	= math.sqrt(gamma_y*epsilon_y)
+	
+	sigmapx = sigma_px * 1000.0
+	sigmapy = sigma_py * 1000.0
+
+	print 'sigma_px 				= %E [m] '% sigma_px
+	print 'sigma_py 				= %E [m] '% sigma_py
+	
+	return sigmax,sigmay, sigmapx,sigmapy, gamma_rel, beta_rel
+
+
+
+	
+
+	
+def uniform_distribution_generator(n_samples,iamp,eamp,sigmax,sigmay):
+	'''based on http://mathworld.wolfram.com/DiskPointPicking.html'''
+	
+	n_samples=int(n_samples)
+	#factor = (eamp - iamp)
+	
+	theta = 2*np.pi*np.random.uniform(0.0, 1.0, n_samples)
+	
+	r = np.sqrt(np.random.uniform(0.0, 1.0, n_samples))
+
+	x = r * np.cos(theta) * (eamp-iamp) * sigmax
+	
+	y = r * np.sin(theta) * (eamp-iamp) * sigmay
+	
+	write_distro_to_file(x, y, 'uniform_%d-%d' %(int(iamp),int(eamp)))
+	
+	return x,y
+
+
+
+
+def initialize_coordinates(n_samples,xp0,yp0,sig0,deltap0,energy0):
+	'''given the user defined initial conditions, created properly shaped vectors
+	to write the fort.13'''
+	
+	xp = np.zeros(n_samples)
+	yp = np.zeros(n_samples)
+
+	sig = np.zeros(n_samples)
+
+	deltap = np.zeros(n_samples)
+	energy = np.zeros(n_samples)
+	
+	xp.fill(xp0)
+	yp.fill(yp0)
+	sig.fill(sig0)
+	deltap.fill(deltap0)
+	energy.fill(energy0)
+	
+	return xp, yp, sig, deltap, energy
+	
+	
+	
+	
+		
+def write_to_file(xi,yi,xpi,ypi,sigi,deltapi,energyi,n_part,relpath):
+	'''Each particle i.c. block is composed of 16 rows
+	x1
+	xp1
+	y1
+	yp1
+	sig1
+	deltap1
+	x2
+	xp2
+	y2
+	yp2
+	sig2
+	deltap2
+	energy0
+	energy1
+	energy2
+	'''
+	output_file = open(os.path.join(relpath,'fort.13'), 'wb')
+	
+	for j in range(0,n_part,2):
+		output_file.write('%47.33f\n' %xi[j])
+		output_file.write('%47.33f\n' %xpi[j])
+		output_file.write('%47.33f\n' %yi[j])
+		output_file.write('%47.33f\n' %ypi[j])
+		output_file.write('%47.33f\n' %sigi[j])
+		output_file.write('%47.33f\n' %deltapi[j])
+		output_file.write('%47.33f\n' %xi[j+1]) #second particle
+		output_file.write('%47.33f\n' %xpi[j+1])
+		output_file.write('%47.33f\n' %yi[j+1])
+		output_file.write('%47.33f\n' %ypi[j+1])
+		output_file.write('%47.33f\n' %sigi[j+1])
+		output_file.write('%47.33f\n' %deltapi[j+1])
+		output_file.write('%47.33f\n' %energyi[j+1])
+		output_file.write('%47.33f\n' %energyi[j+1])
+		output_file.write('%47.33f\n' %energyi[j+1])
+
+	#for j in range(0,n_part):
+	#	output_file.write('%47.33f\n' %xi[j])
+	#	output_file.write('%47.33f\n' %xpi[j])
+	#	output_file.write('%47.33f\n' %yi[j])
+	#	output_file.write('%47.33f\n' %ypi[j])
+	#	output_file.write('%47.33f\n' %sigi[j])
+	#	output_file.write('%47.33f\n' %deltapi[j])
+	#	output_file.write('%47.33f\n' %(xi[j]+0.00001)) #twin particle
+	#	output_file.write('%47.33f\n' %xpi[j])
+	#	output_file.write('%47.33f\n' %yi[j])
+	#	output_file.write('%47.33f\n' %ypi[j])
+	#	output_file.write('%47.33f\n' %sigi[j])
+	#	output_file.write('%47.33f\n' %deltapi[j])
+	#	output_file.write('%47.33f\n' %energyi[j])
+	#	output_file.write('%47.33f\n' %energyi[j])
+	#	output_file.write('%47.33f\n' %energyi[j])
+
+	print 'fort.13 successfully stored in ', output_file
+	
+	output_file.close()
+	
+
+
+
+
+def gaussian(x,y,sigma):
+	'''it assumes that x,y and sigma are all in [mm] units'''	
+	
+	factor = 1.0/2.0 * np.pi * sigma**2
+	
+	gd = factor * np.exp( - (1.0/2.0*sigma**2) * ( (x - np.mean(x))**2 + (y - np.mean(y))**2 ) )
+	
+	gd = gd/sum(gd)
+	
+	gd = gd * 100
+	
+	print 'gaussian = ',type(gd)
+	
+	return gd
+	
+
+
+
+
+def write_distro_to_file(x0, y0, filename):
+	'''writes the current density percentage on a file named filename'''
+	f = open('%s.txt' %filename, 'w')
+	
+	for i in range(len(x0)):
+		f.write('%47.33f %47.33f\n' %(x0[i],y0[i]))
+	
+	f.close()
+	
+	print 'Values stored in ',filename,'.txt'
+	
+	
+	
+
+
+### not used ###	
+def rms_emittance(x,xp,y,yp):
+	'''defined as rmsx = np.sqrt(np.var(x) * np.var(xp)-cov_x_pxm**2.0)
+	'''
+	##### Computes the Co-variance within the bunch of every generated coordinate #####
+	cov_x_pxm = np.cov(x,xp)[0,1]
+	cov_y_pym = np.cov(y,yp)[0,1]
+
+	#### Transverse emittances #####
+	rmsex = np.sqrt(np.var(x) * np.var(xp)-cov_x_pxm**2.0)
+	rmsey = np.sqrt(np.var(y) * np.var(yp)-cov_y_pym**2.0)
+	
+	return rmsex, rmsey
+	
+	
+	
+	
+	
+	
+def other_rms_emittance(rmsex, rmsey):
+	'''defined as 4 times the rms_emittance'''
+	return 4*rmsex, 4*rmsey
+	
+	
+	
+	
+	
+
+def normalised_emittance(rmsex, rmsey, gamma_rel):
+	'''defined as rms_emittance * gamma_rel * beta_rel
+	'''
+	
+	beta_rel = np.sqrt(gamma_rel**2 - 1.0)/gamma_rel
+	
+	nex = rmsex * gamma_rel * beta_rel
+	ney = rmsey * gamma_rel * beta_rel
+
+	return nex, ney
+	
+
