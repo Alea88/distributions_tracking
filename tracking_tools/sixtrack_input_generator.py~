@@ -110,28 +110,13 @@ def make_forts():
 # MAIN
 #-----------------------------------------------------------------------------------------------------------------
 start_time = datetime.datetime.now().time()
-
 print '======= GENERATING SIXTRACK INPUT FILES 2,3,6,8 ======'
-
-
-
-
-print 'If assertion error: user must provide with the mask file in madxinput folder'
-assert os.path.exists('madxinput/%s.mask' %mask_file)		#check that mask file is in madxinput directory
+#get_mask(mask_file,mask_repo) arguably useful
+print 'If assertion error: user must provide with the mask file in the mask folder'
+assert os.path.exists('mask/%s.mask' %mask_file)		#check that mask file is in mask directory
 print mask_file,' correctly found in the mask folder'
 
-
-
-
-print 'If assertion error: user must provide with the fort.3.mother file in sixinput folder'
-assert os.path.exists('sixinput/fort.3.mother')			#check that fort.3.mother is in sixinput directory
-print 'fort.3.mother correctly found in the mask folder'
-
-
-
-
 new_mask_file = update_mask(bunch_charge,seed,mask_file) # substitutes bunch_charge and seed in mask
-
 print 'The mask file',mask_file,'.mask has been updated with the user input data.'
 print 'The new mask file name is: ',new_mask_file,'.mask'
 
