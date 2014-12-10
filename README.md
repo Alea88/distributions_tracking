@@ -17,7 +17,7 @@ so the program phases are all launched by issuing the command: ipython controlle
 
 The 4 sub-phases are contained in the following files:
 
-1) SixTrack Input Generation (bypass for now): 
+1) SixTrack Input Generation: 
 ---
 <pre><code>sixtrack_input_generator.py</code></pre>
 
