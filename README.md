@@ -11,9 +11,9 @@ Program Flow
 
 The program consists of four-phases, all of them managed by commenting and uncommenting the relative functions in the control area.
 
-User Input & Control Flow: <pre><code>control_center.py</code></pre>
+User Input & Control Flow: <pre><code>controller.py</code></pre>
 
-so the program phases are all launched by issuing the command: ipython control_center.py
+so the program phases are all launched by issuing the command: ipython controller.py
 
 The 4 sub-phases are contained in the following files:
 
@@ -21,10 +21,10 @@ The 4 sub-phases are contained in the following files:
 ---
 <pre><code>sixtrack_input_generator.py</code></pre>
 
-* cp .mask
-* substitutes %SEEDRAN and %NPART
-* run madx .mask
-* set idfor = 2 in fc.3 (& fort.3.mother)
+* cp job.mask
+* substitutes %SEEDRAN and %NPART e %IP
+* run madx job.mask
+* copy the fc.3 in the fort.3.mother, rename other fc.s
 * store input files in SixTrack input folder
 
 2) Simulations Launcher:
