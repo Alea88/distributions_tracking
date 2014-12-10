@@ -21,11 +21,11 @@ from uniform_distribution import calc_beam_params,gaussian, uniform_distribution
 
 
 
-def make_folder(folder_name):
+def make_folder(main_folder, subfolder_name):
 	'''creates the folder in which to store the input data for Sixtrack
 	'''
-	os.makedirs('uniform/particleset_%s' %folder_name)
-	relpath = 'uniform/particleset_%s' %folder_name
+	os.makedirs('%s/%s' %(main_folder,subfolder_name))
+	relpath = ('%s/%s' %(main_folder,subfolder_name))
 	
 	return relpath
 	
@@ -81,9 +81,9 @@ def launch_jobs(relpath, SixTrack_folder):
 
 	print DIR
 
-	os.system('chmod +x tracker.sh')
+	os.system('chmod +x tracking_tools/tracker.sh')
 
-	#proc_stat = subprocess.Popen('bsub -q 8nh tracker.sh %s' %DIR, shell=True)
+	#proc_stat = subprocess.Popen('bsub -q 8nh tracking_tools/tracker.sh %s' %DIR, shell=True)
 
 	#os.chdir(home)
 	
@@ -113,6 +113,7 @@ def simulations_launcher_func( 	emitn,
 								SixTrack_folder,
 								forts_folder,
 								fort_n_list,
+								main_folder,
 								folder_name, 
 								beta_star,beta_stary,alpha_x,alpha_y,
 								):
@@ -169,7 +170,8 @@ def simulations_launcher_func( 	emitn,
 	for i in range(iter_num): #loop to launch SixTrack jobs in parallel, one every 30 particles i.c.s
 		ii = i*n_parts
 		ie = (i+1)*n_parts
-		relpath = make_folder(i)
+		sub_folder = folder_name + str(i)
+		relpath = make_folder(main_folder, sub_folder)
 		write_to_file(x[ii:ie],y[ii:ie],xp[ii:ie],yp[ii:ie],sig[ii:ie],deltap[ii:ie],energy[ii:ie],int(n_parts),relpath)
 		#copy_SixTrack(relpath,SixTrack_folder)
 		copy_forts(relpath,forts_folder,fort_n_list)
@@ -177,11 +179,6 @@ def simulations_launcher_func( 	emitn,
 		print ('job %s launched' %relpath)
 	
 	#----------
-	print "ONGOING SIMULATION. DON'T TOUCH"
-	
-	#print 'Waiting for SixTrack to complete.'
-	
-	#proc_status.wait()
 	
 	print 'Launched ', iter_num, 'jobs, as shown here:\n'
 	

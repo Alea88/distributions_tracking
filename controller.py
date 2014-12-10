@@ -74,7 +74,7 @@ n_samples =  60.0 #10080.0 #MUST BE AN INTEGER MULTIPLE OF n_parts
 
 n_parts = 60.0
 
-main_folder = 'uniform'
+main_folder = 'ip%d_seed%d_uniform' %(ip,seed)
 
 
 
@@ -86,7 +86,7 @@ wr_fr = 1000.0
 
 SixTrack_folder  =  '/afs/cern.ch/group/si/slap/bin/sixdesk/exes/SixTrack_pro'
 
-forts_folder  =  '$MYWORK/sixtrack_input/ip' + str(ip) + str(seed)
+forts_folder  =  '$MYWORK/distributions_tracking/sixinput/ip' + str(ip) + '_seed' + str(seed)
 
 fort_n_list  =  [2,3,8,16]
 
@@ -115,14 +115,13 @@ dbname = 'ip1_%d_%s.db' %(int(n_samples),str(eamp))
 
 
 
-launch_madx_and_prepare_sixtrack_input(mask_file,seed,ip,bunch_charge,fort_n_list)
+#launch_madx_and_prepare_sixtrack_input(mask_file,seed,ip,bunch_charge,fort_n_list)
 
 
 
 
 
-#simulations_launcher_func(epsilon_n,energy0,deltap0,xp0,yp0,sig0,iamp,eamp,n_samples,n_parts,wr_fr,SixTrack_folder,forts_folder,fort_n_list,folder_name,beta_star,beta_stary,alpha_x,alpha_y)
-
+simulations_launcher_func(epsilon_n,energy0,deltap0,xp0,yp0,sig0,iamp,eamp,n_samples,n_parts,wr_fr,SixTrack_folder,forts_folder,fort_n_list,main_folder,folder_name,beta_star,beta_stary,alpha_x,alpha_y)
 
 
 

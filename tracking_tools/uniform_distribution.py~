@@ -122,7 +122,7 @@ def uniform_distribution_generator(n_samples,iamp,eamp,sigmax,sigmay):
 	
 	y = r * np.sin(theta) * (eamp-iamp) * sigmay
 	
-	#write_distro_to_file(x, y, 'uniform_%d-%d' %(int(iamp),int(eamp)))
+	write_distro_to_file(x, y, 'uniform_%d-%d' %(int(iamp),int(eamp)))
 	
 	return x,y
 
