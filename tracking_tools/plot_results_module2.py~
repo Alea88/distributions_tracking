@@ -12,8 +12,6 @@
 # --------------------------------------------------------------------------------------------------------------
 
 import numpy as np
-import scipy as sp
-import scipy.stats as stats
 import sqlite3
 import copy
 
@@ -27,7 +25,6 @@ from matplotlib import ticker
 import math
 import pylab as P
 import os
-import subprocess
 
 from db_to_data import read_6D_coordinates_for_specific_turn, read_from_db,read_from_db_all
 from uniform_distribution import calc_beam_params, uniform_distribution_generator, gaussian 
@@ -180,9 +177,9 @@ def beam_scatter_final_comparison(variables_list, label_list, titles_list, t, co
 	ax1.scatter(variables_list[0][0], variables_list[0][1], c = colorant, edgecolors='None')
 	ax1.set_xlabel(r'%s'%label_list[0][0])
 	ax1.set_ylabel(r'%s'%label_list[0][1])
-	ax1.set_xlim([min(variables_list[0][0]) + (min(variables_list[0][0])), max(variables_list[0][0]) + (max(variables_list[0][0]))])
-	ax1.set_ylim([min(variables_list[0][1]) + (min(variables_list[0][1])), max(variables_list[0][1]) + (max(variables_list[0][1]))])
-	ax1.ticklabel_format(style='sci', axis='both', scilimits=(10,10))
+	#ax1.set_xlim([min(variables_list[0][0]) + (min(variables_list[0][0])), max(variables_list[0][0]) + (max(variables_list[0][0]))])
+	#ax1.set_ylim([min(variables_list[0][1]) + (min(variables_list[0][1])), max(variables_list[0][1]) + (max(variables_list[0][1]))])
+	ax1.ticklabel_format(style='plain', axis='both')#, scilimits=(15,15))
 	ax1.grid(b=True, which='major',linestyle='--')
 	
 	#---------- SECOND PLOT --------
@@ -190,9 +187,9 @@ def beam_scatter_final_comparison(variables_list, label_list, titles_list, t, co
 	ax2.scatter(variables_list[1][0], variables_list[1][1], c = colorant, edgecolors='None')
 	ax2.set_xlabel(r'%s'%label_list[1][0])
 	ax2.set_ylabel(r'%s'%label_list[1][1])
-	ax2.set_xlim([min(variables_list[1][0]) + (min(variables_list[1][0])), max(variables_list[1][0]) + (max(variables_list[1][0]))])
-	ax2.set_ylim([min(variables_list[1][1]) + (min(variables_list[1][1])), max(variables_list[1][1]) + (max(variables_list[1][1]))])
-	ax2.ticklabel_format(style='sci', axis='both', scilimits=(10,10))
+	#ax2.set_xlim([min(variables_list[1][0]) + (min(variables_list[1][0])), max(variables_list[1][0]) + (max(variables_list[1][0]))])
+	#ax2.set_ylim([min(variables_list[1][1]) + (min(variables_list[1][1])), max(variables_list[1][1]) + (max(variables_list[1][1]))])
+	ax2.ticklabel_format(style='plain', axis='both')#, scilimits=(15,15))
 	ax2.grid(b=True, which='major',linestyle='--')
 	
 	#---------- THIRD PLOT --------
@@ -200,9 +197,9 @@ def beam_scatter_final_comparison(variables_list, label_list, titles_list, t, co
 	ax3.scatter(variables_list[2][0], variables_list[2][1], c = colorant, edgecolors='None')
 	ax3.set_xlabel(r'%s'%label_list[2][0])
 	ax3.set_ylabel(r'%s'%label_list[2][1])
-	ax3.set_xlim([min(variables_list[2][0]) + (min(variables_list[2][0])), max(variables_list[2][0]) + (max(variables_list[2][0]))])
-	ax3.set_ylim([min(variables_list[2][1]) + (min(variables_list[2][1])), max(variables_list[2][1]) + (max(variables_list[2][1]))])
-	ax3.ticklabel_format(style='sci', axis='both', scilimits=(10,10))
+	#ax3.set_xlim([min(variables_list[2][0]) + (min(variables_list[2][0])), max(variables_list[2][0]) + (max(variables_list[2][0]))])
+	#ax3.set_ylim([min(variables_list[2][1]) + (min(variables_list[2][1])), max(variables_list[2][1]) + (max(variables_list[2][1]))])
+	ax3.ticklabel_format(style='plain', axis='both')#, scilimits=(15,15))
 	ax3.grid(b=True, which='major',linestyle='--')
 	
 	#---------- FOURTH PLOT --------
@@ -249,7 +246,7 @@ def get_colorbar(lost_parts_IDs, dbname, tablename):
 
 	for nth_part in lost_parts_IDs:
 		survived_turns = read_from_db_all('turnID', dbname,tablename,'partID',nth_part)
-		lp_lifetime.append(max(survived_turns))
+		lp_lifetime.append(max(survived_turns)/100000.0)
 	
 	return lp_lifetime
 
@@ -446,6 +443,9 @@ def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp
 
 	print 'Particles tracked = ', npart
 
+	os.system('mkdir plots_%s' %dbname[:-9])
+	main_folder = 'plots%s' %dbname[:-9]
+
 	lost = []
 	tbt_current_loss = []
 	turns = np.arange(int(iturn),int(eturn)+int(wr_fr),int(wr_fr))
@@ -530,10 +530,10 @@ def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp
 			fname ='t%s_%d.png' %(dbname,i)
 			
 			print 'Saving frame', fname
-			fig.savefig(fname)
+			fig.savefig('%s/%s' %(main_folder,fname))
 
 	print 'Particles survived after 10e5 turns = ', len(c['x'])
-	survived = np.array(survived)
+	lost = np.array(lost)
 
 
 
@@ -542,17 +542,17 @@ def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp
 	#energyvar.savefig('relative_energy_variation')
 
 	actionvar = relative_action(Jx0, Jy0, Jx, Jy, ic['x'], ic['y'], c['partID'], sigmax,sigmay)
-	actionvar.savefig('relative_action_variation')
+	actionvar.savefig('%s/relative_action_variation.png' %main_folder)
 
 
 	if list(set(ic['partID'])-set(c['partID'])) != []:
 
 		lvia = lossvsiaction(ic['partID'],c['partID'],Jx0,Jy0, dbname, tablename)
-		lvia.savefig('loss_vs_ic')
+		lvia.savefig('%s/loss_vs_ic.png' %main_folder)
 	
 		absorbed = simple_absorption_plot(lost,n_samples, turns)
-		absorbed.savefig("absorbedparts%s.png" %dbname[:-9])
+		absorbed.savefig("%s/absorbedparts.png" %main_folder)
 
 		currentloss = turn_by_turn_lost_current(tbt_current_loss, turns)
-		currentloss.savefig('turn_by_turn_lost_current')
+		currentloss.savefig('%s/turn_by_turn_lost_current.png' %main_folder)
 

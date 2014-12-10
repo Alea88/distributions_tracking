@@ -112,16 +112,16 @@ def uniform_distribution_generator(n_samples,iamp,eamp,sigmax,sigmay):
 	'''based on http://mathworld.wolfram.com/DiskPointPicking.html'''
 	
 	n_samples=int(n_samples)
-	#factor = (eamp - iamp)
 	
 	theta = 2*np.pi*np.random.uniform(0.0, 1.0, n_samples)
-	
-	r = np.sqrt(np.random.uniform(0.0, 1.0, n_samples))
 
-	x = r * np.cos(theta) * (eamp-iamp) * sigmax
+	A = 2/(eamp**2 - iamp**2)
 	
-	y = r * np.sin(theta) * (eamp-iamp) * sigmay
-	
+	r = np.sqrt(2*np.random.uniform(0.0,1.0,n_samples)/A + iamp**2)
+
+	x = r * np.cos(theta) * sigmax
+	y = r * np.sin(theta) * sigmay
+
 	#write_distro_to_file(x, y, 'uniform_%d-%d' %(int(iamp),int(eamp)))
 	
 	return x,y

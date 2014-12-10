@@ -17,6 +17,7 @@ from simulations_launcher import simulations_launcher_func
 from data_storage import data_storage_func
 from post_processing import activate_post_processing
 
+import numpy as np
 #-----------------------------------------------------------------------------------------------------------------
 # USER INPUT BLOCK
 #-----------------------------------------------------------------------------------------------------------------
@@ -35,7 +36,7 @@ seed 			= 1
 
 
 # ------ optics
-ip = 3
+ip = 1
 
 beta_star = 0.55 	# [m] 
 
@@ -54,13 +55,13 @@ energy0  =  7000000.0 	# MeV
 
 deltap0  =  0.0 	# []
 
-yp0  =  0.0		#[mrad]
+yp0  =  0.1475		#[mrad]
 
 xp0  =  0.0		# [mrad]
 
 sig0  =  0.0 		# []
 
-iamp = 0.0 		# in sigma units
+iamp = 9.0 		# in sigma units
 
 eamp = 10.0 		# in sigma units
 
@@ -88,7 +89,7 @@ SixTrack_folder  =  '/afs/cern.ch/group/si/slap/bin/sixdesk/exes/SixTrack_pro'
 
 forts_folder  =  '$MYWORK/distributions_tracking/sixinput/ip' + str(ip) + '_seed' + str(seed)
 
-fort_n_list  =  [2,3,8,16]
+fort_n_list  =  [2,8,16] #fort.3 gets automatically created, no need to include it in the list
 
 folder_name = "particleset_"
 
@@ -103,7 +104,7 @@ tablename = 'tracking_data' # DON'T MODIFY
 
 dbschema = 'partID, turnID, cd, pdist, x, xp, y, yp, sig, deltap, energy'
 
-dbname = 'ip1_%d_%s.db' %(int(n_samples),str(eamp))
+dbname = 'ip%d_seed%d_samples%d-maxampl%d.db' %(ip,seed,int(n_samples),int(eamp))
 
 
 
@@ -121,7 +122,7 @@ dbname = 'ip1_%d_%s.db' %(int(n_samples),str(eamp))
 
 
 
-simulations_launcher_func(epsilon_n,energy0,deltap0,xp0,yp0,sig0,iamp,eamp,n_samples,n_parts,wr_fr,SixTrack_folder,forts_folder,fort_n_list,main_folder,folder_name,beta_star,beta_stary,alpha_x,alpha_y)
+#simulations_launcher_func(epsilon_n,energy0,deltap0,xp0,yp0,sig0,iamp,eamp,n_samples,n_parts,wr_fr,SixTrack_folder,forts_folder,fort_n_list,main_folder,folder_name,beta_star,beta_stary,alpha_x,alpha_y)
 
 
 
@@ -129,5 +130,7 @@ simulations_launcher_func(epsilon_n,energy0,deltap0,xp0,yp0,sig0,iamp,eamp,n_sam
 
 #data_storage_func( n_samples,n_parts,wr_fr,folder_name, dbname, tablename, main_folder)
 
+clos_orb = np.zeros(6)
+clos_orb[3]= yp0
 
-#activate_post_processing(dbname, tablename, dbschema, epsilon_n, energy0, iamp, eamp, n_samples,wr_fr, np.zeros(6),beta_star,beta_stary,alpha_x,alpha_y)
+activate_post_processing(dbname, tablename, dbschema, epsilon_n, energy0, iamp, eamp, n_samples,wr_fr, clos_orb,beta_star,beta_stary,alpha_x,alpha_y)

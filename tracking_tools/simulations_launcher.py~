@@ -47,9 +47,10 @@ def copy_SixTrack(relpath,SixTrack_folder):
 
 
 def copy_forts(relpath, forts_folder, fort_n_list):
-	'''imports the fort.2, fort.3 (idfor=2!!), fort.8 and fort.16 
+	'''imports the fort.2, fort.3, fort.8 and fort.16 
 	input files for SixTrack
 	'''
+	fort_n_list.append(3)
 	for j in fort_n_list:
 		fortname = forts_folder+'/fort.'+str(j)
 		os.system('cp %s %s' %(fortname,relpath))
@@ -81,9 +82,9 @@ def launch_jobs(relpath, SixTrack_folder):
 
 	print DIR
 
-	os.system('chmod +x tracker.sh')
+	os.system('chmod +x tracking_tools/tracker.sh')
 
-	#proc_stat = subprocess.Popen('bsub -q 8nh tracker.sh %s' %DIR, shell=True)
+	#proc_stat = subprocess.Popen('bsub -q 8nh tracking_tools/tracker.sh %s' %DIR, shell=True)
 
 	#os.chdir(home)
 	
@@ -173,7 +174,7 @@ def simulations_launcher_func( 	emitn,
 		sub_folder = folder_name + str(i)
 		relpath = make_folder(main_folder, sub_folder)
 		write_to_file(x[ii:ie],y[ii:ie],xp[ii:ie],yp[ii:ie],sig[ii:ie],deltap[ii:ie],energy[ii:ie],int(n_parts),relpath)
-		#copy_SixTrack(relpath,SixTrack_folder)
+		copy_SixTrack(relpath,SixTrack_folder)
 		copy_forts(relpath,forts_folder,fort_n_list)
 		home = launch_jobs(relpath, SixTrack_folder)
 		print ('job %s launched' %relpath)

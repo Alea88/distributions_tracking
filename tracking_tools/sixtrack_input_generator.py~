@@ -63,11 +63,11 @@ def launch_madx(mask_name, ip, seed):
 	print 'Working directory changed to ',os.getcwd()
 	print datetime.datetime.now().time(),': Launching MADx', mask_name
 	
-	#out=open('log_%s.log'%mask_name,'wb')
+	out=open('log_%s.log'%mask_name,'wb')
 	err=open('err_%s.log'%mask_name,'wb')
 	proc_stat=subprocess.Popen('madx %s' %mask_file, shell=True,
                         #stdin=subprocess.PIPE,
-                        #stdout=out,
+                        stdout=out,
                         stderr=err,
                         )
 	proc_stat.wait()

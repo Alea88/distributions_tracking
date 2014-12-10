@@ -126,8 +126,8 @@ def create_db(folder_name,dbname,n_samples,tablename):
 
 
 
-def backup_db(dbname):
-	os.system('rfcp %s $CASTOR_HOME' %dbname)
+def backup_db(dbname,foldername):
+	os.system('rfcp %s $CASTOR_HOME/%s' %(dbname,foldername))
 	os.system('nsls')
 	print 'Database ',dbname,' successfully backed up on CASTOR'
 	
@@ -189,7 +189,7 @@ def data_storage_func(	n_samples,
 	
 	update_db(dbname, tablename, tbt_data, wr_fr)
 	
-	#backup_db(dbname)
+	#backup_db(dbname,main_folder)
 	
 	print 'Data successfully stored in ', dbname, ' with the following row structure'
 	print '(',dbschema,')'
