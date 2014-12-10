@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------------------------------------------
-# SIMULATIONS CONTROLLER
+# SIMULATIONS MAIN CONTROLLER
 # GIOVANNA CAMPOGIANI
 # LAST MODFIIED: 9/12/2014
 # --------------------------------------------------------------------------------------------------------------
@@ -12,14 +12,10 @@ sys.path.append("/afs/cern.ch/work/g/gcampogi/public/distributions_tracking/trac
 # LIBRARIES
 #-----------------------------------------------------------------------------------------------------------------
 
-
+from sixtrack_input_generator import launch_madx_and_prepare_sixtrack_input
 from simulations_launcher import simulations_launcher_func
 from data_storage import data_storage_func
 from post_processing import activate_post_processing
-
-import numpy as np
-
-
 
 #-----------------------------------------------------------------------------------------------------------------
 # USER INPUT BLOCK
@@ -31,11 +27,15 @@ import numpy as np
 
 #------- mad-X
 
-mask_file = 'nomLHC_withbb_coll'
+mask_file = 'jobref503_withbb_coll'
 
 bunch_charge 	= 10e11
 
 seed 			= 1
+
+
+# ------ optics
+ip = 3
 
 beta_star = 0.55 	# [m] 
 
@@ -86,7 +86,7 @@ wr_fr = 1000.0
 
 SixTrack_folder  =  '/afs/cern.ch/group/si/slap/bin/sixdesk/exes/SixTrack_pro'
 
-forts_folder  =  '$MYWORK/sixtrack_input/ip1'
+forts_folder  =  '$MYWORK/sixtrack_input/ip' + str(ip) + str(seed)
 
 fort_n_list  =  [2,3,8,16]
 
@@ -115,7 +115,7 @@ dbname = 'ip1_%d_%s.db' %(int(n_samples),str(eamp))
 
 
 
-#sixtrack_input_generator()
+launch_madx_and_prepare_sixtrack_input(mask_file,seed,ip,bunch_charge,fort_n_list)
 
 
 
@@ -128,7 +128,7 @@ dbname = 'ip1_%d_%s.db' %(int(n_samples),str(eamp))
 
 
 
-data_storage_func( n_samples,n_parts,wr_fr,folder_name, dbname, tablename, main_folder)
+#data_storage_func( n_samples,n_parts,wr_fr,folder_name, dbname, tablename, main_folder)
 
 
 #activate_post_processing(dbname, tablename, dbschema, epsilon_n, energy0, iamp, eamp, n_samples,wr_fr, np.zeros(6),beta_star,beta_stary,alpha_x,alpha_y)
