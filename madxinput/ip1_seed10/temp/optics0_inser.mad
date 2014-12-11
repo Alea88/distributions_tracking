@@ -42,7 +42,7 @@
 @ TITLE            %08s "no-title"
 @ ORIGIN           %22s "MAD-X 5.02.00 Linux 64"
 @ DATE             %08s "11/12/14"
-@ TIME             %08s "12.15.28"
+@ TIME             %08s "14.43.20"
 * NAME                             BETX               BETY                  X                  Y 
 $ %s                                %le                %le                %le                %le 
  "MQXA.1R1..1"              1013.376188         1013.37619                  0                  0

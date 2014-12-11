@@ -42,7 +42,7 @@
 @ TITLE            %08s "no-title"
 @ ORIGIN           %22s "MAD-X 5.02.00 Linux 64"
 @ DATE             %08s "11/12/14"
-@ TIME             %08s "12.15.25"
+@ TIME             %08s "14.43.17"
 * NAME                                X                  Y               BETX               BETY 
 $ %s                                %le                %le                %le                %le 
  "BBMK_PAR.L5B2_45"     0.0009931932745   -3.807592173e-12        262.8132466        1500.510385

@@ -33,7 +33,7 @@ mask_file = 'jobref503_withbb_coll'
 
 bunch_charge 	= 1e11
 
-seed 	= 60
+seed 	= 10
 
 ip = 1
 
@@ -50,7 +50,7 @@ sig0 = 0.0
 
 iamp = 7.0 		# in sigma units
 
-eamp = 10.0 		# in sigma units
+eamp = 14.0 		# in sigma units
 
 
 
@@ -58,7 +58,7 @@ eamp = 10.0 		# in sigma units
 
 #-------- distribution
 
-n_samples =  180.0 #10080.0 #MUST BE AN INTEGER MULTIPLE OF n_parts
+n_samples =  240.0 #10080.0 #MUST BE AN INTEGER MULTIPLE OF n_parts
 
 n_parts = 60.0
 

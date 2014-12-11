@@ -164,7 +164,7 @@ def read_twiss(seed,ip):
 
 	os.system('gzip %s' %twiss_file)	
 
-	return twiss_data
+	return tw_data
 
 
 

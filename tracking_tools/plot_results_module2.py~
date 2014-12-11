@@ -210,7 +210,7 @@ def beam_scatter_final_comparison(variables_list, label_list, titles_list, t, co
 	ax4.ticklabel_format(style='sci', axis='both', scilimits=(0,0))
 	ax4.grid(b=True, which='major',linestyle='--')
 	
-	plt.suptitle(titles_list[0]+'; '+titles_list[1]+' '+titles_list[2]+'; '+titles_list[3]+'\n @turn %d' %t)
+	plt.suptitle('Data of turn n. %d' %t)
 		
 	plt.show()
 	
@@ -371,10 +371,12 @@ def relative_energy(en0,en,x0,y0,partID,sigmax,sigmay):
 
 def action(u, key1, key2, b):
 	'''assumes a dictionary u{x,xp,y,yp}
-	Action = pi * radius of normalised phase space squared
+	Action = radius of normalised phase space squared
 	'''
 		
-	J = (u[key1]**2 + u[key2]**2)/(b*2.0)
+	J = np.pi * ((u[key1]**2 + u[key2]**2))
+	
+	#J = (u[key1]**2 + u[key2]**2)/(2.0 * b)
 
 	return J
 
@@ -394,11 +396,11 @@ def invariant_coordinates_trasf(x, xp, y, yp, bx,by, ax, ay):
 	u = {}
 	
 	
-	u['X'] = x
-	u['Px'] = bx * xp + ax * x
+	u['X'] = x/np.sqrt(bx)
+	u['Px'] = xp/np.sqrt(bx) + ax * x/(np.sqrt(bx**3))
 	
-	u['Y'] = y
-	u['Py'] = by * yp + ay * y
+	u['Y'] = y/np.sqrt(by)
+	u['Py'] = yp/np.sqrt(by) + ay * y/(np.sqrt(by**3))
 	
 	return u
 	
@@ -531,7 +533,7 @@ def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp
 			[r'$J_{x}$',r'$J_{y}$'],
 			]
 		
-			titles_list = ['Configuration space','Horizontal and','Vertical phase space','Action space'] 
+			titles_list = [' ',' ',' ',' '] 
 		
 			fig = beam_scatter_final_comparison(variables_list, label_list, titles_list, i, gd[c['partID']-1])
 		

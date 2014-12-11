@@ -33,7 +33,7 @@ mask_file = 'jobref503_withbb_coll'
 
 bunch_charge 	= 1e11
 
-seed 	= 60
+seed 	= 10
 
 ip = 1
 
@@ -50,7 +50,7 @@ sig0 = 0.0
 
 iamp = 7.0 		# in sigma units
 
-eamp = 10.0 		# in sigma units
+eamp = 14.0 		# in sigma units
 
 
 
@@ -58,7 +58,7 @@ eamp = 10.0 		# in sigma units
 
 #-------- distribution
 
-n_samples =  180.0 #10080.0 #MUST BE AN INTEGER MULTIPLE OF n_parts
+n_samples =  240.0 #10080.0 #MUST BE AN INTEGER MULTIPLE OF n_parts
 
 n_parts = 60.0
 
@@ -100,11 +100,11 @@ dbname = '%s_samples%d-maxampl%d.db' %(main_folder,int(n_samples),int(eamp))
 #-----------------------------------------------------------------------------------------------------------------
 
 
-launch_madx_and_prepare_sixtrack_input(mask_file,seed,ip,bunch_charge,fort_n_list)
+#launch_madx_and_prepare_sixtrack_input(mask_file,seed,ip,bunch_charge,fort_n_list)
 
 
 
-simulations_launcher_func(epsilon_n,energy0,deltap0,ip,seed,sig0,iamp,eamp,n_samples,n_parts,wr_fr,SixTrack_folder,forts_folder,fort_n_list,main_folder,folder_name)
+#simulations_launcher_func(epsilon_n,energy0,deltap0,ip,seed,sig0,iamp,eamp,n_samples,n_parts,wr_fr,SixTrack_folder,forts_folder,fort_n_list,main_folder,folder_name)
 
 
 
@@ -114,4 +114,4 @@ simulations_launcher_func(epsilon_n,energy0,deltap0,ip,seed,sig0,iamp,eamp,n_sam
 
 
 
-#activate_post_processing(dbname, tablename, dbschema, epsilon_n, energy0, iamp, eamp, main_folder,wr_fr,ip,seed)
+activate_post_processing(dbname, tablename, dbschema, epsilon_n, energy0, iamp, eamp, main_folder,wr_fr,ip,seed)

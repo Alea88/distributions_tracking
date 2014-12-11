@@ -371,10 +371,12 @@ def relative_energy(en0,en,x0,y0,partID,sigmax,sigmay):
 
 def action(u, key1, key2, b):
 	'''assumes a dictionary u{x,xp,y,yp}
-	Action = pi * radius of normalised phase space squared
+	Action = radius of normalised phase space squared
 	'''
 		
-	J = (u[key1]**2 + u[key2]**2)/(b*2.0)
+	J = np.pi * ((u[key1]**2 + u[key2]**2))
+	
+	#J = (u[key1]**2 + u[key2]**2)/(2.0 * b)
 
 	return J
 
@@ -394,11 +396,11 @@ def invariant_coordinates_trasf(x, xp, y, yp, bx,by, ax, ay):
 	u = {}
 	
 	
-	u['X'] = x
-	u['Px'] = bx * xp + ax * x
+	u['X'] = x/np.sqrt(bx)
+	u['Px'] = (bx * xp + ax * x)/(np.sqrt(bx**3))
 	
-	u['Y'] = y
-	u['Py'] = by * yp + ay * y
+	u['Y'] = y/np.sqrt(by)
+	u['Py'] = (by * yp + ay * y)/(np.sqrt(by**3))
 	
 	return u
 	
