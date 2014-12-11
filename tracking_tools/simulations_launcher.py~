@@ -9,7 +9,7 @@ import datetime
 import subprocess
 import os
 
-from uniform_distribution import calc_beam_params,gaussian, uniform_distribution_generator,write_to_file,initialize_coordinates
+from uniform_distribution import calc_beam_params,gaussian, uniform_distribution_generator,write_to_file,initialize_coordinates, read_twiss
 
 
 
@@ -100,23 +100,7 @@ def launch_jobs(relpath, SixTrack_folder):
 #-----------------------------------------------------------------------------------------------------------------
 	
 		
-def simulations_launcher_func( 	emitn, 
-								energy0, 
-								deltap0, 
-								ip,
-								sig0,
-								iamp,
-								eamp,
-								n_samples,
-								n_parts,
-								wr_fr,
-								SixTrack_folder,
-								forts_folder,
-								fort_n_list,
-								main_folder,
-								folder_name, 
-								beta_star,beta_stary,alpha_x,alpha_y,
-								):
+def simulations_launcher_func(emitn,energy0,deltap0,ip,seed,sig0,iamp,eamp,n_samples,n_parts,wr_fr,SixTrack_folder,forts_folder,fort_n_list,main_folder,folder_name):
 
 
 
@@ -132,14 +116,15 @@ def simulations_launcher_func( 	emitn,
 	
 	assert n_samples % n_parts == 0.0
 	
-	sigmax,sigmay, sigmapx,sigmapy, gamma_rel, beta_rel = calc_beam_params(emitn, energy0, beta_star,beta_stary, alpha_x, alpha_y)
+	twiss = read_twiss(seed,ip)
+	sigmax,sigmay, sigmapx,sigmapy, gamma_rel, beta_rel = calc_beam_params(emitn, energy0, twiss['betx'],twiss['bety'], twiss['alfx'], twiss['alfy'])
 	
 	
 	print 'Next step: generating uniform distribution of ',n_samples
 	
 	print 'distributed between ', iamp, 'and ', eamp, ' mm of radius'
 	
-	x, y = uniform_distribution_generator(n_samples,iamp,eamp,sigmax,sigmay)
+	x, y = uniform_distribution_generator(n_samples,iamp,eamp,sigmax,sigmay,twiss['x'],twiss['y'])
 	
 	print 'Uniform distribution generated.'
 
@@ -161,7 +146,7 @@ def simulations_launcher_func( 	emitn,
 	print 'Next step: generation of the fort.13 with the desidered initial conditions'
 	
 	#---------
-	xp, yp, sig, deltap, energy = initialize_coordinates(n_samples, ip, sig0, deltap0, energy0)
+	xp, yp, sig, deltap, energy = initialize_coordinates(n_samples, twiss['xp'],twiss['yp'], energy0, sig0, deltap0, twiss['x'],twiss['y'])
 	
 	iter_num = int(n_samples/n_parts) # number of iterations
 	

@@ -9,9 +9,15 @@
 # --------------------------------------------------------------------------------------------------------------
 
 import numpy as np
-
 import os
 import math
+
+import sys
+sys.path.append("/afs/cern.ch/eng/sl/lintrack/Python_Classes4MAD/")
+try:
+	from metaclass import *
+except:
+	from metaclass25 import *
 
 
 #-----------------------------------------------------------------------------------------------------------------
@@ -108,7 +114,7 @@ def calc_beam_params(epsilon_n, E0, beta_star,beta_stary, alpha_x, alpha_y):
 	
 
 	
-def uniform_distribution_generator(n_samples,iamp,eamp,sigmax,sigmay):
+def uniform_distribution_generator(n_samples,iamp,eamp,sigmax,sigmay,x0,y0):
 	'''based on http://mathworld.wolfram.com/DiskPointPicking.html'''
 	
 	n_samples=int(n_samples)
@@ -122,6 +128,9 @@ def uniform_distribution_generator(n_samples,iamp,eamp,sigmax,sigmay):
 	x = r * np.cos(theta) * sigmax
 	y = r * np.sin(theta) * sigmay
 
+	x += x0
+	y += y0
+
 	#write_distro_to_file(x, y, 'uniform_%d-%d' %(int(iamp),int(eamp)))
 	
 	return x,y
@@ -129,7 +138,40 @@ def uniform_distribution_generator(n_samples,iamp,eamp,sigmax,sigmay):
 
 
 
-def initialize_coordinates(n_samples,ip,energy0,sig0=0.0,deltap0=0.0):
+
+
+def read_twiss(seed,ip):
+
+	madxfolder = 'madxinput/ip%d_seed%d' %(ip,seed)
+
+	twiss_file = '%s/last_twiss.%d' %(madxfolder,seed)
+
+	os.system('gunzip %s.gz' %twiss_file)
+	
+	tw = twiss(twiss_file)
+
+	tw_data = {}
+	tw_data['x']=(tw.X[0])*1000.0
+	tw_data['xp']=(tw.PX[0])*1000.0
+	tw_data['y']=(tw.Y[0])*1000.0
+	tw_data['yp']=(tw.PY[0])*1000.0
+	tw_data['betx']=tw.BETX[0]
+	tw_data['bety']=tw.BETY[0]
+	tw_data['alfx']=tw.ALFX[0]
+	tw_data['alfy']=tw.ALFY[0]
+	
+	print tw_data
+
+	os.system('gzip %s' %twiss_file)	
+
+	return tw_data
+
+
+
+
+
+
+def initialize_coordinates(n_samples,xp0,yp0,energy0,sig0=0.0,deltap0=0.0):
 	'''given the user defined initial conditions, created properly shaped vectors
 	to write the fort.13'''
 	
@@ -139,16 +181,6 @@ def initialize_coordinates(n_samples,ip,energy0,sig0=0.0,deltap0=0.0):
 	deltap = np.zeros(n_samples)
 	energy = np.zeros(n_samples)
 	
-	if ip == 1:
-
-		yp0 = 0.1475
-		xp0 = 0.0
-
-	elif ip == 5:
-		
-		xp0 = 0.1475
-		yp0 = 0.0
-		
 	xp.fill(xp0)
 	yp.fill(yp0)
 	sig.fill(sig0)

@@ -25,7 +25,7 @@ import pylab as P
 import os
 
 from db_to_data import read_6D_coordinates_for_specific_turn, read_from_db,read_from_db_all
-from uniform_distribution import calc_beam_params, uniform_distribution_generator, gaussian 
+from uniform_distribution import calc_beam_params, uniform_distribution_generator, gaussian, read_twiss
 from data_storage import backup_file
 
 # --------------------------------------------------------------------------------------------------------------
@@ -210,7 +210,7 @@ def beam_scatter_final_comparison(variables_list, label_list, titles_list, t, co
 	ax4.ticklabel_format(style='sci', axis='both', scilimits=(0,0))
 	ax4.grid(b=True, which='major',linestyle='--')
 	
-	plt.suptitle(titles_list[0]+'; '+titles_list[1]+' '+titles_list[2]+'; '+titles_list[3]+'\n @turn %d' %t)
+	plt.suptitle('Data of turn n. %d' %t)
 		
 	plt.show()
 	
@@ -428,11 +428,21 @@ def read_distro(filename):
 # MAIN
 #------------------------------------------------------------------------	
 
-def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp, main_folder,wr_fr,ip,beta_star,beta_stary,alpha_x,alpha_y):
+def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp, main_folder,wr_fr,ip,seed):
 	'''runs the post-processing analysis'''
+
+	twiss = read_twiss(seed,ip)
+
+	beta_star = twiss['betx']
+	beta_stary = twiss['bety']
+	alpha_x = twiss['alfx']
+	alpha_y = twiss['alfy']
 	
-	sigmax,sigmay, sigmapx,sigmapy, gamma_rel, beta_rel = calc_beam_params(emitn, energy0, beta_star,beta_stary, alpha_x, alpha_y)
-	
+	sigmax,sigmay, sigmapx,sigmapy, gamma_rel, beta_rel = calc_beam_params(emitn, energy0, twiss['betx'],twiss['bety'],twiss['alfx'],twiss['alfy'])
+
+	closorb = [twiss['x'], twiss['xp'],twiss['y'],twiss['yp']]
+
+
 	iturn = 0		#raw_input('Insert the starting point turn number:\t')
 	eturn = 100000 	#raw_input('Insert the end point turn number:\t')
 	
@@ -447,13 +457,6 @@ def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp
 	lost = []
 	tbt_current_loss = []
 	turns = np.arange(int(iturn),int(eturn)+int(wr_fr),int(wr_fr))
-
-	closorb = np.zeros(6)
-	
-	if ip == 1:
-		closorb[3] == 0.1475
-	elif ip == 5:
-		closorb[1] == 0.1475
 
 	for i in turns:
 
@@ -528,7 +531,7 @@ def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp
 			[r'$J_{x}$',r'$J_{y}$'],
 			]
 		
-			titles_list = ['Configuration space','Horizontal and','Vertical phase space','Action space'] 
+			titles_list = [' ',' ',' ',' '] 
 		
 			fig = beam_scatter_final_comparison(variables_list, label_list, titles_list, i, gd[c['partID']-1])
 		

@@ -14,14 +14,7 @@ from plot_results_module2 import post_processing_func
 # MAIN
 #-----------------------------------------------------------------------------------------------------------------
 
-def activate_post_processing( dbname, 
-								tablename, 
-								dbschema, 
-								emitn, 
-								energy0, 
-								iamp, eamp,n_samples,wr_fr, closorb,
-								beta_star,beta_stary,alpha_x,alpha_y,
-								):
+def activate_post_processing(dbname,tablename,dbschema,epsilon_n,energy0,iamp,eamp,main_folder,wr_fr,ip,seed):
 
 
 	
@@ -35,7 +28,7 @@ def activate_post_processing( dbname,
 	
 	
 	
-	post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp, n_samples,wr_fr, closorb,beta_star,beta_stary,alpha_x,alpha_y)
+	post_processing_func(dbname, tablename, dbschema, epsilon_n, energy0, iamp, eamp, main_folder,wr_fr,ip,seed)
 	
 	
 	

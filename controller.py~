@@ -17,6 +17,8 @@ from simulations_launcher import simulations_launcher_func
 from data_storage import data_storage_func
 from post_processing import activate_post_processing
 
+from uniform_distribution import read_twiss
+
 #-----------------------------------------------------------------------------------------------------------------
 # USER INPUT BLOCK
 #-----------------------------------------------------------------------------------------------------------------
@@ -29,21 +31,11 @@ from post_processing import activate_post_processing
 
 mask_file = 'jobref503_withbb_coll'
 
-bunch_charge 	= 10e11
+bunch_charge 	= 1e11
 
-seed 			= 1
+seed 	= 60
 
-
-# ------ optics
 ip = 1
-
-beta_star = 0.55 	# [m] 
-
-beta_stary = beta_star 	#[m]
-
-alpha_x = 0.0 		# [m^-1]
-
-alpha_y = alpha_x 	#[m^-1]
 
 
 #------- beam
@@ -52,7 +44,11 @@ epsilon_n = 3.75e-6 	# [m*rad]
 
 energy0  =  7000000.0 	# MeV
 
-iamp = 9.0 		# in sigma units
+deltap0 = 0.0
+
+sig0 = 0.0
+
+iamp = 7.0 		# in sigma units
 
 eamp = 10.0 		# in sigma units
 
@@ -62,7 +58,7 @@ eamp = 10.0 		# in sigma units
 
 #-------- distribution
 
-n_samples =  60.0 #10080.0 #MUST BE AN INTEGER MULTIPLE OF n_parts
+n_samples =  180.0 #10080.0 #MUST BE AN INTEGER MULTIPLE OF n_parts
 
 n_parts = 60.0
 
@@ -104,21 +100,18 @@ dbname = '%s_samples%d-maxampl%d.db' %(main_folder,int(n_samples),int(eamp))
 #-----------------------------------------------------------------------------------------------------------------
 
 
-
-
 #launch_madx_and_prepare_sixtrack_input(mask_file,seed,ip,bunch_charge,fort_n_list)
 
 
 
-
-#simulations_launcher_func(epsilon_n,energy0,deltap0,ip,sig0,iamp,eamp,n_samples,n_parts,wr_fr,SixTrack_folder,forts_folder,fort_n_list,main_folder,folder_name,beta_star,beta_stary,alpha_x,alpha_y)
-
-
-
-
-#data_storage_func( n_samples,n_parts,wr_fr,folder_name, dbname, tablename, main_folder)
+#simulations_launcher_func(epsilon_n,energy0,deltap0,ip,seed,sig0,iamp,eamp,n_samples,n_parts,wr_fr,SixTrack_folder,forts_folder,fort_n_list,main_folder,folder_name)
 
 
 
 
-activate_post_processing(dbname, tablename, dbschema, epsilon_n, energy0, iamp, eamp, main_folder,wr_fr,ip,beta_star,beta_stary,alpha_x,alpha_y)
+data_storage_func( n_samples,n_parts,wr_fr,folder_name, dbname, tablename, main_folder)
+
+
+
+
+activate_post_processing(dbname, tablename, dbschema, epsilon_n, energy0, iamp, eamp, main_folder,wr_fr,ip,seed)

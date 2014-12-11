@@ -88,7 +88,7 @@ def integratefc3 (madxfolder, sixfolder):
 	f.close()
 
 	f_old = open("sixinput/fort.3.mother")	
-	f_new = open("%s/fort.3" %sixfolder, "wb")
+	f_new = open("%s/fort.3" %sixfolder, "wb+")
 
 	for line in f_old:
 		if 'INSERT MULT DATA HERE' in line:
