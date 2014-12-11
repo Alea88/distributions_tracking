@@ -129,18 +129,26 @@ def uniform_distribution_generator(n_samples,iamp,eamp,sigmax,sigmay):
 
 
 
-def initialize_coordinates(n_samples,xp0,yp0,sig0,deltap0,energy0):
+def initialize_coordinates(n_samples,ip,sig0=0.0,deltap0=0.0,energy0):
 	'''given the user defined initial conditions, created properly shaped vectors
 	to write the fort.13'''
 	
 	xp = np.zeros(n_samples)
 	yp = np.zeros(n_samples)
-
 	sig = np.zeros(n_samples)
-
 	deltap = np.zeros(n_samples)
 	energy = np.zeros(n_samples)
 	
+	if ip == 1:
+
+		yp0 = 0.1475
+		xp0 = 0.0
+
+	elif ip == 5:
+		
+		xp0 = 0.1475
+		yp0 = 0.0
+		
 	xp.fill(xp0)
 	yp.fill(yp0)
 	sig.fill(sig0)

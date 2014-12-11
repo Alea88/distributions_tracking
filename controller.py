@@ -53,14 +53,6 @@ epsilon_n = 3.75e-6 	# [m*rad]
 
 energy0  =  7000000.0 	# MeV
 
-deltap0  =  0.0 	# []
-
-yp0  =  0.1475		#[mrad]
-
-xp0  =  0.0		# [mrad]
-
-sig0  =  0.0 		# []
-
 iamp = 9.0 		# in sigma units
 
 eamp = 10.0 		# in sigma units
@@ -122,7 +114,7 @@ dbname = 'ip%d_seed%d_samples%d-maxampl%d.db' %(ip,seed,int(n_samples),int(eamp)
 
 
 
-#simulations_launcher_func(epsilon_n,energy0,deltap0,xp0,yp0,sig0,iamp,eamp,n_samples,n_parts,wr_fr,SixTrack_folder,forts_folder,fort_n_list,main_folder,folder_name,beta_star,beta_stary,alpha_x,alpha_y)
+#simulations_launcher_func(epsilon_n,energy0,deltap0,ip,sig0,iamp,eamp,n_samples,n_parts,wr_fr,SixTrack_folder,forts_folder,fort_n_list,main_folder,folder_name,beta_star,beta_stary,alpha_x,alpha_y)
 
 
 

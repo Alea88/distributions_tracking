@@ -103,8 +103,7 @@ def launch_jobs(relpath, SixTrack_folder):
 def simulations_launcher_func( 	emitn, 
 								energy0, 
 								deltap0, 
-								xp0, 
-								yp0,
+								ip,
 								sig0,
 								iamp,
 								eamp,
@@ -162,7 +161,7 @@ def simulations_launcher_func( 	emitn,
 	print 'Next step: generation of the fort.13 with the desidered initial conditions'
 	
 	#---------
-	xp, yp, sig, deltap, energy = initialize_coordinates(n_samples, xp0, yp0, sig0, deltap0, energy0)
+	xp, yp, sig, deltap, energy = initialize_coordinates(n_samples, ip, sig0, deltap0, energy0)
 	
 	iter_num = int(n_samples/n_parts) # number of iterations
 	
