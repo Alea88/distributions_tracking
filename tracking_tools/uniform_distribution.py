@@ -129,7 +129,7 @@ def uniform_distribution_generator(n_samples,iamp,eamp,sigmax,sigmay):
 
 
 
-def initialize_coordinates(n_samples,ip,sig0=0.0,deltap0=0.0,energy0):
+def initialize_coordinates(n_samples,ip,energy0,sig0=0.0,deltap0=0.0):
 	'''given the user defined initial conditions, created properly shaped vectors
 	to write the fort.13'''
 	

@@ -17,7 +17,6 @@ from simulations_launcher import simulations_launcher_func
 from data_storage import data_storage_func
 from post_processing import activate_post_processing
 
-import numpy as np
 #-----------------------------------------------------------------------------------------------------------------
 # USER INPUT BLOCK
 #-----------------------------------------------------------------------------------------------------------------
@@ -96,7 +95,7 @@ tablename = 'tracking_data' # DON'T MODIFY
 
 dbschema = 'partID, turnID, cd, pdist, x, xp, y, yp, sig, deltap, energy'
 
-dbname = 'ip%d_seed%d_samples%d-maxampl%d.db' %(ip,seed,int(n_samples),int(eamp))
+dbname = '%s_samples%d-maxampl%d.db' %(main_folder,int(n_samples),int(eamp))
 
 
 
@@ -107,9 +106,7 @@ dbname = 'ip%d_seed%d_samples%d-maxampl%d.db' %(ip,seed,int(n_samples),int(eamp)
 
 
 
-
 #launch_madx_and_prepare_sixtrack_input(mask_file,seed,ip,bunch_charge,fort_n_list)
-
 
 
 
@@ -119,10 +116,9 @@ dbname = 'ip%d_seed%d_samples%d-maxampl%d.db' %(ip,seed,int(n_samples),int(eamp)
 
 
 
-
 #data_storage_func( n_samples,n_parts,wr_fr,folder_name, dbname, tablename, main_folder)
 
-clos_orb = np.zeros(6)
-clos_orb[3]= yp0
 
-activate_post_processing(dbname, tablename, dbschema, epsilon_n, energy0, iamp, eamp, n_samples,wr_fr, clos_orb,beta_star,beta_stary,alpha_x,alpha_y)
+
+
+activate_post_processing(dbname, tablename, dbschema, epsilon_n, energy0, iamp, eamp, main_folder,wr_fr,ip,beta_star,beta_stary,alpha_x,alpha_y)

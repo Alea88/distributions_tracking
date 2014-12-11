@@ -3,7 +3,7 @@
 # RESULT PLOTS
 # forked from ANDREA SANTAMARIA source
 # by GIOVANNA CAMPOGIANI
-# LAST MODIFIED: 15/09/2014
+# LAST MODIFIED: 10/12/2014
 # This script plots the tracking data results, superimposed with the distribution
 # --------------------------------------------------------------------------------------------------------------
 
@@ -13,22 +13,19 @@
 
 import numpy as np
 import sqlite3
-import copy
 
 import matplotlib
 matplotlib.use("Agg")
 
 from matplotlib import pyplot as plt
 from matplotlib import rc
-from matplotlib import ticker
 
-import math
 import pylab as P
 import os
 
 from db_to_data import read_6D_coordinates_for_specific_turn, read_from_db,read_from_db_all
 from uniform_distribution import calc_beam_params, uniform_distribution_generator, gaussian 
-
+from data_storage import backup_file
 
 # --------------------------------------------------------------------------------------------------------------
 # Text characteristics of the plots
@@ -430,7 +427,7 @@ def read_distro(filename):
 # MAIN
 #------------------------------------------------------------------------	
 
-def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp, n_samples,wr_fr, closorb,beta_star,beta_stary,alpha_x,alpha_y):
+def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp, main_folder,wr_fr,ip,beta_star,beta_stary,alpha_x,alpha_y):
 	'''runs the post-processing analysis'''
 	
 	sigmax,sigmay, sigmapx,sigmapy, gamma_rel, beta_rel = calc_beam_params(emitn, energy0, beta_star,beta_stary, alpha_x, alpha_y)
@@ -443,12 +440,19 @@ def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp
 
 	print 'Particles tracked = ', npart
 
-	os.system('mkdir plots_%s' %dbname[:-9])
-	main_folder = 'plots%s' %dbname[:-9]
+	os.system('mkdir %s/plots' %main_folder)
+	plots_folder = '%s/plots' %main_folder
 
 	lost = []
 	tbt_current_loss = []
 	turns = np.arange(int(iturn),int(eturn)+int(wr_fr),int(wr_fr))
+
+	closorb = np.zeros(6)
+	
+	if ip == 1:
+		closorb[3] == 0.1475
+	elif ip == 5:
+		closorb[1] == 0.1475
 
 	for i in turns:
 
@@ -530,7 +534,7 @@ def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp
 			fname ='t%s_%d.png' %(dbname,i)
 			
 			print 'Saving frame', fname
-			fig.savefig('%s/%s' %(main_folder,fname))
+			fig.savefig('%s/%s' %(plots_folder,fname))
 
 	print 'Particles survived after 10e5 turns = ', len(c['x'])
 	lost = np.array(lost)
@@ -542,17 +546,19 @@ def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp
 	#energyvar.savefig('relative_energy_variation')
 
 	actionvar = relative_action(Jx0, Jy0, Jx, Jy, ic['x'], ic['y'], c['partID'], sigmax,sigmay)
-	actionvar.savefig('%s/relative_action_variation.png' %main_folder)
+	actionvar.savefig('%s/relative_action_variation.png' %plots_folder)
 
 
 	if list(set(ic['partID'])-set(c['partID'])) != []:
 
 		lvia = lossvsiaction(ic['partID'],c['partID'],Jx0,Jy0, dbname, tablename)
-		lvia.savefig('%s/loss_vs_ic.png' %main_folder)
+		lvia.savefig('%s/loss_vs_ic.png' %plots_folder)
 	
-		absorbed = simple_absorption_plot(lost,n_samples, turns)
-		absorbed.savefig("%s/absorbedparts.png" %main_folder)
+		absorbed = simple_absorption_plot(lost,npart, turns)
+		absorbed.savefig("%s/absorbedparts.png" %plots_folder)
 
 		currentloss = turn_by_turn_lost_current(tbt_current_loss, turns)
-		currentloss.savefig('%s/turn_by_turn_lost_current.png' %main_folder)
+		currentloss.savefig('%s/turn_by_turn_lost_current.png' %plots_folder)
+
+	backup_file(plots_folder,main_folder)
 
