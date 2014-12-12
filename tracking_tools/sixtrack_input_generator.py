@@ -22,7 +22,7 @@ import subprocess
 
 
 
-def update_mask(NPART,SEEDRAN,IP,mask_name):
+def update_mask(NPART,SEEDRAN,IP,mask_name,main_folder):
 	'''assumes NPART=bunch_charge, SEEDRAN=seed
 	returns the name of a new mask file with the input data substitutes to %SEEDRAN and %NPART
 	'''
@@ -41,8 +41,8 @@ def update_mask(NPART,SEEDRAN,IP,mask_name):
 	infile.close()
 	outfile.close()
 
-	os.makedirs('madxinput/ip%d_seed%d' %(IP,SEEDRAN))
-	os.system('mv madxinput/%s.mask madxinput/ip%d_seed%d' %(new_mask_name,IP,SEEDRAN))
+	os.makedirs('%s/madxinput/ip%d_seed%d' %(main_folder,IP,SEEDRAN))
+	os.system('mv madxinput/%s.mask %s/madxinput/ip%d_seed%d' %(new_mask_name,main_folder,IP,SEEDRAN))
 	
 	print 'The mask file',mask_name,'.mask has been updated with the user input data.'
 	print 'The new mask file name is: ',new_mask_name,'.mask'
@@ -53,12 +53,12 @@ def update_mask(NPART,SEEDRAN,IP,mask_name):
 
 
 
-def launch_madx(mask_name, ip, seed):
+def launch_madx(mask_name,ip, seed,main_folder):
 	'''to generate the SixTrack input file from the mask
 	'''
 	mask_file=mask_name+'.mask'
 	home=os.environ['PWD']
-	madxfolder = 'madxinput/ip' + str(ip) + '_seed' + str(seed)
+	madxfolder = main_folder +'/madxinput/ip' + str(ip) + '_seed' + str(seed)
 	os.chdir(madxfolder)
 	print 'Working directory changed to ',os.getcwd()
 	print datetime.datetime.now().time(),': Launching MADx', mask_name
@@ -118,7 +118,7 @@ def makeforts(madxfolder, sixfolder, files_list):
 # MAIN
 #-----------------------------------------------------------------------------------------------------------------
 
-def launch_madx_and_prepare_sixtrack_input(mask_file,seed,ip,bunch_charge,files_list):
+def launch_madx_and_prepare_sixtrack_input(mask_file,seed,ip,bunch_charge,files_list,main_folder):
 
 
 	start_time = datetime.datetime.now().time()
@@ -144,19 +144,19 @@ def launch_madx_and_prepare_sixtrack_input(mask_file,seed,ip,bunch_charge,files_
 	
 	
 	print 'Next step: update the mask file with the user defined IP, SEED and BUNCH CHARGE values'
-	new_mask_file = update_mask(bunch_charge,seed,ip,mask_file) # substitutes bunch_charge and seed in mask
+	new_mask_file = update_mask(bunch_charge,seed,ip,mask_file,main_folder) # substitutes bunch_charge and seed in mask
 
 	
 	
 	
 	print 'Next step: launch MADx'
-	madxfolder = launch_madx(new_mask_file,ip, seed)
+	madxfolder = launch_madx(new_mask_file,ip, seed,main_folder)
 	
 	
 	
 	
 	print 'Next step: integrate fc.3 in the fort.3.mother file'
-	sixfolder = 'sixinput/ip' + str(ip) + '_seed' + str(seed)
+	sixfolder = main_folder + '/sixinput/ip' + str(ip) + '_seed' + str(seed)
 	integratefc3( madxfolder,  sixfolder)
 	
 	

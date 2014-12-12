@@ -35,7 +35,7 @@ bunch_charge 	= 1e11
 
 seed 	= 10
 
-ip = 1
+ip = 5
 
 
 #------- beam
@@ -48,7 +48,7 @@ deltap0 = 0.0
 
 sig0 = 0.0
 
-iamp = 7.0 		# in sigma units
+iamp = 0.0 		# in sigma units
 
 eamp = 14.0 		# in sigma units
 
@@ -62,7 +62,7 @@ n_samples =  240.0 #10080.0 #MUST BE AN INTEGER MULTIPLE OF n_parts
 
 n_parts = 60.0
 
-main_folder = 'ip%d_seed%d_uniform' %(ip,seed)
+main_folder = '%s_ip%d_seed%d' %(mask_file,ip,seed)
 
 
 
@@ -74,7 +74,7 @@ wr_fr = 1000.0
 
 SixTrack_folder  =  '/afs/cern.ch/group/si/slap/bin/sixdesk/exes/SixTrack_pro'
 
-forts_folder  =  '$MYWORK/distributions_tracking/sixinput/ip' + str(ip) + '_seed' + str(seed)
+forts_folder  =  '$MYWORK/distributions_tracking/%s/sixinput/ip%d_seed%d' %(main_folder,ip,seed)
 
 fort_n_list  =  [2,8,16] #fort.3 gets automatically created, no need to include it in the list
 
@@ -100,7 +100,7 @@ dbname = '%s_samples%d-maxampl%d.db' %(main_folder,int(n_samples),int(eamp))
 #-----------------------------------------------------------------------------------------------------------------
 
 
-#launch_madx_and_prepare_sixtrack_input(mask_file,seed,ip,bunch_charge,fort_n_list)
+#launch_madx_and_prepare_sixtrack_input(mask_file,seed,ip,bunch_charge,fort_n_list,main_folder)
 
 
 
@@ -114,4 +114,4 @@ data_storage_func( n_samples,n_parts,wr_fr,folder_name, dbname, tablename, main_
 
 
 
-activate_post_processing(dbname, tablename, dbschema, epsilon_n, energy0, iamp, eamp, main_folder,wr_fr,ip,seed)
+#activate_post_processing(dbname, tablename, dbschema, epsilon_n, energy0, iamp, eamp, main_folder,wr_fr,ip,seed)

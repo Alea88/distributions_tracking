@@ -169,7 +169,6 @@ def data_storage_func(	n_samples,
 
 
 	
-
 	start_time = datetime.datetime.now().time()
 	
 	print '\n ======= START OF DATA STORAGE UTILITY ====== \n\n'
@@ -181,6 +180,10 @@ def data_storage_func(	n_samples,
 	print 'Next step: storing the data in an SQlite db'
 	
 	i = int(n_samples / n_parts) - 1
+
+	
+	main_folder = main_folder + '/data'
+
 	
 	tbt_data, closo = data_to_dictionary(main_folder,folder_name, i)
 	
@@ -219,7 +222,6 @@ def data_storage_func(	n_samples,
 	print 'The program started at ', start_time, ' and ended at', end_time
 	
 	
-	
-	
+
 	
 	print '\n ======= END OF DATA STORAGE UTILITY ====== \n\n'

@@ -140,9 +140,9 @@ def uniform_distribution_generator(n_samples,iamp,eamp,sigmax,sigmay,x0,y0):
 
 
 
-def read_twiss(seed,ip):
+def read_twiss(main_folder,seed,ip):
 
-	madxfolder = 'madxinput/ip%d_seed%d' %(ip,seed)
+	madxfolder = '%s/madxinput/ip%d_seed%d' %(main_folder,ip,seed)
 
 	twiss_file = '%s/last_twiss.%d' %(madxfolder,seed)
 

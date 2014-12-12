@@ -238,16 +238,6 @@ def simple_absorption_plot(lost_parts, n_samples, turns):
 	return fig
 
 
-def get_colorbar(lost_parts_IDs, dbname, tablename):
-	'''reads the max survived turn of each of the lost particles'''
-	lp_lifetime = []
-
-	for nth_part in lost_parts_IDs:
-		survived_turns = read_from_db_all('turnID', dbname,tablename,'partID',nth_part)
-		lp_lifetime.append(max(survived_turns)/100000.0)
-	
-	return lp_lifetime
-
 
 
 def lossvsiaction(initial_population, final_population, Jx0, Jy0, dbname, tablename):
@@ -259,7 +249,7 @@ def lossvsiaction(initial_population, final_population, Jx0, Jy0, dbname, tablen
 	print  'IDs of lost particles are: ',lost_population
 	print 'The total number of absorbed particles is: ', len(lost_population), '/', len(initial_population)
 
-	cb = get_colorbar(lost_population, dbname, tablename)	
+	cb = 'b'
 
 	lost_population = np.array(lost_population) - 1
 
@@ -342,6 +332,30 @@ def relative_action(Jx0, Jy0, Jx, Jy, x0, y0, partID, sigmax,sigmay):
 
 
 
+def get_lifetime(lost_parts_IDs, dbname, tablename):
+	'''reads the max survived turn of each of the lost particles'''
+	lp_lifetime = []
+
+	for nth_part in lost_parts_IDs:
+		survived_turns = read_from_db_all('turnID', dbname,tablename,'partID',nth_part)
+		lp_lifetime.append(max(survived_turns)/100000.0)
+	
+	return lp_lifetime
+
+
+
+
+
+
+def action_evolution(lpi):
+	
+	life = get_lifetime(lpi, dbname, tablename)
+	
+	pass
+
+
+
+
 def relative_energy(en0,en,x0,y0,partID,sigmax,sigmay):
 	'''relative energy variation, useless if 4D'''
 
@@ -397,10 +411,10 @@ def invariant_coordinates_trasf(x, xp, y, yp, bx,by, ax, ay):
 	
 	
 	u['X'] = x/np.sqrt(bx)
-	u['Px'] = xp/np.sqrt(bx) + ax * x/(np.sqrt(bx**3))
+	u['Px'] = (bx * xp + ax * x)/(np.sqrt(bx**3))
 	
 	u['Y'] = y/np.sqrt(by)
-	u['Py'] = yp/np.sqrt(by) + ay * y/(np.sqrt(by**3))
+	u['Py'] = (by * yp + ay * y)/(np.sqrt(by**3))
 	
 	return u
 	
@@ -433,7 +447,9 @@ def read_distro(filename):
 def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp, main_folder,wr_fr,ip,seed):
 	'''runs the post-processing analysis'''
 
-	twiss = read_twiss(seed,ip)
+	#os.chdir(main_folder)
+
+	twiss = read_twiss(seed,ip,main_folder)
 
 	beta_star = twiss['betx']
 	beta_stary = twiss['bety']
@@ -554,8 +570,9 @@ def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp
 	actionvar = relative_action(Jx0, Jy0, Jx, Jy, ic['x'], ic['y'], c['partID'], sigmax,sigmay)
 	actionvar.savefig('%s/relative_action_variation.png' %plots_folder)
 
+	lost_particles_indexes = list(set(ic['partID'])-set(c['partID']))
 
-	if list(set(ic['partID'])-set(c['partID'])) != []:
+	if  lost_particles_indexes != []:
 
 		lvia = lossvsiaction(ic['partID'],c['partID'],Jx0,Jy0, dbname, tablename)
 		lvia.savefig('%s/loss_vs_ic.png' %plots_folder)
@@ -565,6 +582,11 @@ def post_processing_func(dbname, tablename, dbschema, emitn, energy0, iamp, eamp
 
 		currentloss = turn_by_turn_lost_current(tbt_current_loss, turns)
 		currentloss.savefig('%s/turn_by_turn_lost_current.png' %plots_folder)
-
+		
+		#ae = action_evolution(lost_particles_indexes)
+		#ae.savefig('%s/action_evolution.png' %plots_folder)
+		
 	backup_file(plots_folder,main_folder)
+
+	#os.chdir('..')
 

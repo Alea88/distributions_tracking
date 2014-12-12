@@ -102,10 +102,6 @@ def launch_jobs(relpath, SixTrack_folder):
 		
 def simulations_launcher_func(emitn,energy0,deltap0,ip,seed,sig0,iamp,eamp,n_samples,n_parts,wr_fr,SixTrack_folder,forts_folder,fort_n_list,main_folder,folder_name):
 
-
-
-
-
 	start_time = datetime.datetime.now().time()
 	
 	print '\n\n ======= START OF USER INPUT GENERATION AND JOB LAUNCHER ====== \n\n'
@@ -116,7 +112,7 @@ def simulations_launcher_func(emitn,energy0,deltap0,ip,seed,sig0,iamp,eamp,n_sam
 	
 	assert n_samples % n_parts == 0.0
 	
-	twiss = read_twiss(seed,ip)
+	twiss = read_twiss(main_folder,seed,ip)
 	sigmax,sigmay, sigmapx,sigmapy, gamma_rel, beta_rel = calc_beam_params(emitn, energy0, twiss['betx'],twiss['bety'], twiss['alfx'], twiss['alfy'])
 	
 	
@@ -152,6 +148,8 @@ def simulations_launcher_func(emitn,energy0,deltap0,ip,seed,sig0,iamp,eamp,n_sam
 	
 	n_file = np.arange(iter_num) # folder number
 	
+	main_folder = main_folder + '/data'
+
 	for i in range(iter_num): #loop to launch SixTrack jobs in parallel, one every 30 particles i.c.s
 		ii = i*n_parts
 		ie = (i+1)*n_parts
@@ -181,9 +179,6 @@ def simulations_launcher_func(emitn,energy0,deltap0,ip,seed,sig0,iamp,eamp,n_sam
 	end_time = datetime.datetime.now().time()
 	
 	print 'This script was launched at ',start_time,' and terminated at',end_time
-	
-	
-	
 	
 	
 	print '\n ======= END OF USER INPUT GENERATION AND JOB LAUNCHER ====== \n\n'
