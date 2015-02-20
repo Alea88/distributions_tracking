@@ -4,22 +4,23 @@ distributions_tracking
 This repository contains the files to track distributions of particles in the LHC with [SixTrack](http://sixtrack.web.cern.ch/SixTrack/).
 
 The controller.py file contains all the input data, that has to specify:
-madx parameters
-1. madx mask file name
-..* bunch_charge
-..* random generator seed for the errors
-..* ip number
-2. beam parameters
-..* normalised emittance [m*rad]
-..* energy [MeV]
-..* deltap/p [%]
-..* sig0 = 0.0
-..* starting amplitude iamp # in sigma units
-..* final amplitude eamp # in sigma units
+
+1. madx parameters
+  * madx mask file name
+  * bunch_charge
+  * random generator seed for the errors
+  * ip number
+2. beam parameters 
+  * normalised emittance [m*rad]
+  * energy [MeV]
+  * deltap/p [%]
+  * sig0 = 0.0
+  * starting amplitude iamp # in sigma units
+  * final amplitude eamp # in sigma units
 3. distribution parameters
-..* number of samples #MUST BE AN INTEGER MULTIPLE OF 60
+  * number of samples #MUST BE AN INTEGER MULTIPLE OF 60
 4. SixTrack
-..*SixTrack location (SixTrack_folder)
+  * SixTrack location (SixTrack_folder)
 
 there are other parameters in the controller file, but they are NOT to be modified
 
